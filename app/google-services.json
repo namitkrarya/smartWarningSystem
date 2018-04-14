@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "148555717203",
+    "firebase_url": "https://smartwarningsystem-c573b.firebaseio.com",
+    "project_id": "smartwarningsystem-c573b",
+    "storage_bucket": "smartwarningsystem-c573b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:148555717203:android:7e53cb257393bf2d",
+        "android_client_info": {
+          "package_name": "io.github.nitinkedia7.smartwarningsystem"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "148555717203-t6e30br5011hbf2edm8tnbdmvkj0p5fv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAY5oAAWJgdMLttbyQ6kYdO6p4onWkHJoc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
