@@ -116,13 +116,21 @@ public class LoginActivity extends AppCompatActivity {
                                         public void onDataChange(DataSnapshot dataSnapshot) {
                                             if(dataSnapshot.getValue() != null) {
                                                 userType = dataSnapshot.getValue().toString();
-                                                Log.d("Login", userType);
+//                                                Log.d("Login", userType);
 //                                                Toast.makeText(LoginActivity.this, userType, Toast.LENGTH_LONG).show();
+                                                if(userType.equals("Professor")){
+                                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+//                                                intent.putExtra("mUsertype", userType);
+                                                    startActivity(intent);
+                                                    finish();
+                                                }
+                                                else{
+                                                    Intent intent = new Intent(LoginActivity.this, StudentActivity.class);
+//                                                intent.putExtra("mUsertype", userType);
+                                                    startActivity(intent);
+                                                    finish();
+                                                }
 
-                                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                                intent.putExtra("mUsertype", userType);
-                                                startActivity(intent);
-                                                finish();
                                             }
                                         }
                                         @Override

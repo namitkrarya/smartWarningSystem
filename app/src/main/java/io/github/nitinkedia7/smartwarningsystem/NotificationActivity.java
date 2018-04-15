@@ -17,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -56,7 +57,7 @@ public class NotificationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notification);
-
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mFirebaseAuth = FirebaseAuth.getInstance();
@@ -98,7 +99,7 @@ public class NotificationActivity extends AppCompatActivity {
                     Random rand = new Random();
 
                     Integer randState = rand.nextInt(10)+1;
-                    StudentState studentState = new StudentState(fullName,randState, isBlacklisted, "none");
+                    StudentState studentState = new StudentState(fullName,randState, isBlacklisted, "none", user.getUid());
                     mDatabaseReference.child("session").child("joinedUsers").child(user.getUid()).setValue(studentState);
                     if(mChildEventListener == null) {
                         mChildEventListener = new ChildEventListener() {
@@ -210,5 +211,21 @@ public class NotificationActivity extends AppCompatActivity {
         timer.start();
 
         mAdapter.notifyDataSetChanged();
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // API 5+ solution
+
+                onBackPressed();
+                Intent intent = new Intent(NotificationActivity.this, StudentActivity.class);
+                NotificationActivity.this.startActivity(intent);
+
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

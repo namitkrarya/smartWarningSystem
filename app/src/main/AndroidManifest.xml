@@ -31,7 +31,8 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".ClassReviewActivity"></activity>
+        <activity android:name=".ClassReviewActivity" />
+        <activity android:name=".StudentActivity"></activity>
     </application>
 
 </manifest>

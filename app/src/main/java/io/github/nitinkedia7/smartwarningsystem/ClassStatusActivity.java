@@ -17,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -53,6 +54,7 @@ public class ClassStatusActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_status);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view_status);
@@ -109,5 +111,21 @@ public class ClassStatusActivity extends AppCompatActivity {
 
 
         mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // API 5+ solution
+                onBackPressed();
+                Intent intent = new Intent(ClassStatusActivity.this, MainActivity.class);
+                ClassStatusActivity.this.startActivity(intent);
+                finish();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

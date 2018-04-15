@@ -11,6 +11,9 @@ public class StudentState {
     private String isBlacklisted;
     private String review;
 
+
+    private String uid;
+
     public String getReview() {
         return review;
     }
@@ -30,12 +33,22 @@ public class StudentState {
     public StudentState() {
     }
 
-    public StudentState(String name, Integer state, String isBlacklisted, String review) {
+    public StudentState(String name, Integer state, String isBlacklisted, String review, String uid) {
         this.name = name;
         this.state = state;
         this.isBlacklisted = isBlacklisted;
         this.review = review;
+        this.uid = uid;
     }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
 
     public String getName() {
         return name;

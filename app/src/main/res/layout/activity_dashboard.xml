@@ -12,47 +12,38 @@
 
     <Button
         android:id="@+id/createSessionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/joinSessionButton"
-        android:layout_marginTop="21dp"
+        android:layout_width="160dp"
+        android:layout_height="60dp"
+        android:layout_above="@+id/classStatusButton"
+        android:layout_alignStart="@+id/classStatusButton"
+        android:layout_marginBottom="51dp"
         android:text="Create Session" />
-
-    <Button
-        android:id="@+id/joinSessionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="69dp"
-        android:text="Join Session" />
 
 
     <Button
         android:id="@+id/endSessionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/classReviewButton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="21dp"
+        android:layout_width="160dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/classReviewButton"
+        android:layout_marginBottom="87dp"
         android:text="End Session" />
 
     <Button
         android:id="@+id/classStatusButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/createSessionButton"
+        android:layout_width="160dp"
+        android:layout_height="60dp"
+        android:layout_above="@+id/classReviewButton"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="21dp"
+        android:layout_marginBottom="48dp"
         android:text="Class Status" />
 
     <Button
         android:id="@+id/classReviewButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/classStatusButton"
+        android:layout_width="160dp"
+        android:layout_height="60dp"
+        android:layout_above="@+id/endSessionButton"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="21dp"
+        android:layout_marginBottom="57dp"
         android:text="Class Review" />
 </RelativeLayout>

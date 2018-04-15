@@ -37,6 +37,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -44,14 +45,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     public static final String ANONYMOUS = "anonymous";
     public static final int RC_SIGN_IN = 1;
-    private String course_name = "";
-    private String status = "";
-    private String session_password = "";
-    private String password = "", name = "";
-
+    private String course_name;
+    private String session_password;
 
     private Button mCreateSessionButton;
-    private Button mJoinSessionButton;
     private Button mEndSessionButton;
     private Button mClassStatusButton;
     private Button mClassReviewButton;
@@ -79,17 +76,17 @@ public class MainActivity extends AppCompatActivity {
         mFirebaseAuth = FirebaseAuth.getInstance();
 
         mUsername = ANONYMOUS;
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            mUsertype = extras.getString("mUsertype");
-            usertype = extras.getString("mUsertype");
-        }
-
-        if(mUsertype == null){
-            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-            MainActivity.this.startActivity(intent);
-            finish();
-        }
+//        Bundle extras = getIntent().getExtras();
+//        if (extras != null) {
+//            mUsertype = extras.getString("mUsertype");
+//            usertype = extras.getString("mUsertype");
+//        }
+//
+//        if(mUsertype == null){
+//            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+//            MainActivity.this.startActivity(intent);
+//            finish();
+//        }
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
@@ -99,21 +96,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         mCreateSessionButton = (Button) findViewById(R.id.createSessionButton);
-        mJoinSessionButton = (Button) findViewById(R.id.joinSessionButton);
         mEndSessionButton = (Button) findViewById(R.id.endSessionButton);
         mClassStatusButton = (Button) findViewById(R.id.classStatusButton);
         mClassReviewButton = (Button) findViewById(R.id.classReviewButton);
-        Toast.makeText(MainActivity.this, mUsertype, Toast.LENGTH_LONG).show();
-        if(usertype.equals("Professor")){
-            mJoinSessionButton.setVisibility(View.INVISIBLE);
-        }
-        else{
-            mCreateSessionButton.setVisibility(View.INVISIBLE);
-            mClassStatusButton.setVisibility(View.INVISIBLE);
-            mEndSessionButton.setVisibility(View.INVISIBLE);
-            mClassReviewButton.setVisibility(View.INVISIBLE);
-
-        }
 
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -132,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
-//                System.out.println("The read failed: " + databaseError.getCode());
+//                          System.out.println("The read failed: " + databaseError.getCode());
                         }
                     });
 
@@ -159,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
                         session_password = sessionPassword.getText().toString();
                         course_name = courseName.getText().toString();
                         mSessionDatabaseReference.child("courseName").setValue(course_name);
+                        mSessionDatabaseReference.child("isUserJoined").setValue("false");
                         mSessionDatabaseReference.child("sessionPassword").setValue(session_password);
 
                         mSessionDatabaseReference.child("state").setValue("ACTIVE");
@@ -187,101 +173,61 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mJoinSessionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FirebaseUser user = mFirebaseAuth.getCurrentUser();
-                final String uid = user.getUid();
-
-                mDatabaseReference.child("session").child("state").addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        status = dataSnapshot.getValue().toString();
-                    }
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-//                System.out.println("The read failed: " + databaseError.getCode());
-                    }
-                });
-                if(status.equals("INACTIVE")){
-                    Toast.makeText(MainActivity.this, "Session is INACTIVE", Toast.LENGTH_SHORT).show();
-                }
-                else {
-
-                    final StudentState studentState = new StudentState(mUsername, 10, "Not Blacklisted", "none");
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setTitle("Enter Session Details");
-                    View viewInflated = getLayoutInflater().inflate(R.layout.join_session_dialog, (ViewGroup) null, false);
-                    // Set up the input
-                    final EditText courseName = (EditText) viewInflated.findViewById(R.id.courseToJoin);
-                    final EditText sessionPassword = (EditText) viewInflated.findViewById(R.id.sessionPassword);
-
-                    // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                    builder.setView(viewInflated);
-
-                    // Set up the buttons
-                    mDatabaseReference.child("session").addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            name = dataSnapshot.child("courseName").getValue().toString();
-                            password = dataSnapshot.child("sessionPassword").getValue().toString();
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-//                System.out.println("The read failed: " + databaseError.getCode());
-                        }
-                    });
-
-                    builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-
-
-                            if (!name.equals(courseName.getText().toString()) || !password.equals(sessionPassword.getText().toString())) {
-                                Toast.makeText(MainActivity.this, "Incorrect Details!", Toast.LENGTH_SHORT).show();
-                                dialog.dismiss();
-                            } else {
-                                mUsersDatabaseReference.child(uid).setValue(studentState);
-                                mAlertsDatabaseReference.child(uid).child("sentAlerts").setValue("None");
-                                mAlertsDatabaseReference.child(uid).child("unresponsiveAlerts").setValue("None");
-                                Toast.makeText(MainActivity.this, "Successfully Joined Session!", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(MainActivity.this, NotificationActivity.class);
-                                MainActivity.this.startActivity(intent);
-                                dialog.dismiss();
-                            }
-                        }
-                    });
-                    builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    });
-
-                    builder.show();
-
-                }
-            }
-        });
 
         mClassStatusButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "Showing class status!", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(MainActivity.this, ClassStatusActivity.class);
-                MainActivity.this.startActivity(intent);
+
+                mDatabaseReference.child("session").child("isUserJoined").addListenerForSingleValueEvent(
+                        new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if(Boolean.valueOf(dataSnapshot.getValue().toString())) {
+                                    Toast.makeText(MainActivity.this, "Showing class status!", Toast.LENGTH_LONG).show();
+                                    Intent intent = new Intent(MainActivity.this, ClassStatusActivity.class);
+                                    MainActivity.this.startActivity(intent);
+                                    finish();
+                                }
+                                else{
+                                    Toast.makeText(MainActivity.this, "No Students Joined!", Toast.LENGTH_LONG).show();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                //handle databaseError
+                            }
+                        });
+
+
+
             }
         });
 
         mClassReviewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "Showing class review!", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(MainActivity.this, ClassReviewActivity.class);
-                MainActivity.this.startActivity(intent);
+
+                mDatabaseReference.child("session").child("isUserJoined").addListenerForSingleValueEvent(
+                        new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if(Boolean.valueOf(dataSnapshot.getValue().toString())) {
+                                    Toast.makeText(MainActivity.this, "Showing class review!", Toast.LENGTH_LONG).show();
+                                    Intent intent = new Intent(MainActivity.this, ClassReviewActivity.class);
+                                    MainActivity.this.startActivity(intent);
+                                    finish();
+                                }
+                                else{
+                                    Toast.makeText(MainActivity.this, "No Students Joined!", Toast.LENGTH_LONG).show();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                //handle databaseError
+                            }
+                        });
             }
         });
 

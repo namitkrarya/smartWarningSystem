@@ -17,7 +17,7 @@ import java.util.List;
 
 public class ClassReviewAdapter extends RecyclerView.Adapter<ClassReviewAdapter.MyViewHolder> {
 
-    private List<ClassReview> studentList;
+    private List<StudentState> studentList;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView state, name, status, review;
@@ -32,7 +32,7 @@ public class ClassReviewAdapter extends RecyclerView.Adapter<ClassReviewAdapter.
     }
 
 
-    public ClassReviewAdapter(List<ClassReview> studentList) {
+    public ClassReviewAdapter(List<StudentState> studentList) {
         this.studentList = studentList;
     }
 
@@ -46,8 +46,8 @@ public class ClassReviewAdapter extends RecyclerView.Adapter<ClassReviewAdapter.
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        ClassReview class_review = studentList.get(position);
-        holder.status.setText(class_review.getStatus());
+        StudentState class_review = studentList.get(position);
+        holder.status.setText(class_review.getIsBlacklisted());
         holder.state.setText("State : " + class_review.getState());
         holder.name.setText(class_review.getName());
         holder.review.setText(class_review.getReview());

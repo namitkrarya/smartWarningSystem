@@ -21,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +46,7 @@ import java.util.Map;
 import java.util.Random;
 
 public class ClassReviewActivity extends AppCompatActivity {
-    private List<ClassReview> studentList = new ArrayList<>();
+    private List<StudentState> studentList = new ArrayList<>();
     private RecyclerView recyclerView;
     private ClassReviewAdapter mAdapter;
 
@@ -59,7 +60,7 @@ public class ClassReviewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_class_review);
-
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view_review);
 
@@ -74,13 +75,12 @@ public class ClassReviewActivity extends AppCompatActivity {
         mDatabaseReference = mFirebaseDatabase.getReference();
 
 
-        mDatabaseReference.child("session").child("joinedUsers").addListenerForSingleValueEvent(
+        mDatabaseReference.child("session").addListenerForSingleValueEvent(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         //Get map of users in datasnapshot
-
-                        prepareStatusData((Map<String, Object>) dataSnapshot.getValue());
+                        prepareStatusData((Map<String, Object>) dataSnapshot.child("joinedUsers").getValue());
                     }
 
                     @Override
@@ -93,7 +93,7 @@ public class ClassReviewActivity extends AppCompatActivity {
         recyclerView.addOnItemTouchListener(new NotificationTouchListener(getApplicationContext(), recyclerView, new NotificationTouchListener.ClickListener() {
             @Override
             public void onClick(View view, final int position) {
-                final ClassReview student = studentList.get(position);
+                final StudentState student = studentList.get(position);
 //                Toast.makeText(getApplicationContext(), "Opening Review Dialog", Toast.LENGTH_SHORT).show();
                 AlertDialog.Builder builder = new AlertDialog.Builder(ClassReviewActivity.this, R.style.MyDialogTheme);
                 builder.setTitle(student.getName());
@@ -134,14 +134,32 @@ public class ClassReviewActivity extends AppCompatActivity {
 
     private void prepareStatusData(Map<String,Object> students) {
         //iterate through each user, ignoring their UID
+        Log.d("Review", Integer.toString(students.size()));
         for (Map.Entry<String, Object> entry : students.entrySet()){
 
             //Get user map
             Map singleUser = (Map) entry.getValue();
             String uid = entry.getKey();
-            ClassReview student = new ClassReview(singleUser.get("name").toString(), singleUser.get("state").toString(), singleUser.get("isBlacklisted").toString(), singleUser.get("review").toString(), uid);
-            studentList.add(student);
+            if(singleUser.get("isBlacklisted").toString().equals("Blacklisted")) {
+                StudentState student = new StudentState(singleUser.get("name").toString(), Integer.valueOf(singleUser.get("state").toString()), singleUser.get("isBlacklisted").toString(), singleUser.get("review").toString(), uid);
+                studentList.add(student);
+            }
         }
         mAdapter.notifyDataSetChanged();
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // API 5+ solution
+                onBackPressed();
+                Intent intent = new Intent(ClassReviewActivity.this, MainActivity.class);
+                ClassReviewActivity.this.startActivity(intent);
+                finish();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
