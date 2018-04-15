@@ -9,9 +9,10 @@ admin.initializeApp();
  * Followers add a flag to `/followers/{followedUid}/{followerUid}`.
  * Users save their device notification tokens to `/users/{followedUid}/notificationTokens/{notificationToken}`.
  */
-exports.sendNotification = functions.database.ref('/session/joinedUsers/{Uid}/state')
+exports.sendNotification = functions.database.ref('/Sessions/{session_name}/joinedUsers/{Uid}/state')
     .onWrite((change, context) => {
       const Uid = context.params.Uid;
+      const session_name = context.params.session_name;
       // If un-follow we exit the function.
       if (!change.after.val()) {
         return console.log('User with ', Uid, 'state save corrupted');
@@ -19,11 +20,11 @@ exports.sendNotification = functions.database.ref('/session/joinedUsers/{Uid}/st
       console.log('New state of user with UID : ', Uid, 'is',  change.after.val());
       const state = change.after.val();
       if(state > 9){
-        return console.log('Kedia tu!');
+        return console.log('State is good!');
       }
       // Get the list of device notification tokens.
       const getDeviceTokensPromise = admin.database()
-          .ref(`additionalUserData/${Uid}/token`).once('value');
+          .ref(`Students/${Uid}/token`).once('value');
 
       const notification = {
           title: 'Attentiveness Alert',
@@ -31,7 +32,7 @@ exports.sendNotification = functions.database.ref('/session/joinedUsers/{Uid}/st
           // icon: follower.photoURL
         };
 
-      const alertPromise = admin.database().ref(`/session/alerts/${Uid}/sentAlerts`).push().set(notification);
+      const alertPromise = admin.database().ref(`/Sessions/${session_name}/alerts/${Uid}/sentAlerts`).push().set(notification);
 
       
       // Get the follower profile.
