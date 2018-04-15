@@ -1,11 +1,5 @@
 package io.github.nitinkedia7.smartwarningsystem;
 
-import java.util.Date;
-
-/**
- * Created by nk7 on 11/04/18.
- */
-
 public class notification {
     private boolean isClickable;
     private String state, comment;

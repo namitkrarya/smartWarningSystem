@@ -34,6 +34,7 @@ public class SignupActivity extends AppCompatActivity {
     private DatabaseReference mDatabaseReference;
     private String userType;
     private String fullName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,17 +107,21 @@ public class SignupActivity extends AppCompatActivity {
                                 } else {
                                     FirebaseUser user = auth.getCurrentUser();
                                     String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-                                    AdditionalUserInfo userinfo = new AdditionalUserInfo(userType, fullName, refreshedToken);
-                                    mDatabaseReference.child("additionalUserData").child(user.getUid()).setValue(userinfo);
-                                    Toast.makeText(SignupActivity.this, "Additional Data Saved", Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(SignupActivity.this, MainActivity.class);
-                                    intent.putExtra("mUsertype", userType);
-                                    startActivity(intent);
-                                    finish();
+                                    AdditionalUserInfo userinfo = new AdditionalUserInfo(fullName, "false", refreshedToken, "None");
+                                    if (userType.equals("Professor")) {
+                                        mDatabaseReference.child("Professors").child(user.getUid()).setValue(userinfo);
+                                        Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    } else {
+                                        mDatabaseReference.child("Students").child(user.getUid()).setValue(userinfo);
+                                        Intent intent = new Intent(SignupActivity.this, StudentActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }
                                 }
                             }
                         });
-
             }
         });
     }

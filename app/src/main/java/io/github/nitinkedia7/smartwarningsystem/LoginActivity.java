@@ -34,6 +34,9 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private Button btnSignup, btnLogin;
     public String userType;
+    private ValueEventListener mValueEventListener;
+    private ValueEventListener mValueEventListener2;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,16 +47,8 @@ public class LoginActivity extends AppCompatActivity {
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
 
-        if (auth.getCurrentUser() != null) {
-            startActivity(new Intent(LoginActivity.this, MainActivity.class));
-            finish();
-        }
-
         // set the view now
         setContentView(R.layout.activity_login);
-
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
 
         inputEmail = (EditText) findViewById(R.id.email);
         inputPassword = (EditText) findViewById(R.id.password);
@@ -107,40 +102,42 @@ public class LoginActivity extends AppCompatActivity {
                                         Toast.makeText(LoginActivity.this, getString(R.string.auth_failed), Toast.LENGTH_LONG).show();
                                     }
                                 } else {
-                                    FirebaseUser user = auth.getCurrentUser();
-                                    String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-
-                                    mDatabaseReference.child("additionalUserData").child(user.getUid()).child("token").setValue(refreshedToken);
-                                    mDatabaseReference.child("additionalUserData").child(user.getUid()).child("userType").addValueEventListener(new ValueEventListener() {
+                                    final FirebaseUser user = auth.getCurrentUser();
+                                    final String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+                                    mValueEventListener = new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
-                                            if(dataSnapshot.getValue() != null) {
-                                                userType = dataSnapshot.getValue().toString();
-//                                                Log.d("Login", userType);
-//                                                Toast.makeText(LoginActivity.this, userType, Toast.LENGTH_LONG).show();
-                                                if(userType.equals("Professor")){
+                                            if(dataSnapshot.exists()) {
+                                                    mDatabaseReference.child("Professors").child(user.getUid()).removeEventListener(mValueEventListener);
+                                                    mDatabaseReference.child("Professors").child(user.getUid()).child("token").setValue(refreshedToken);
                                                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-//                                                intent.putExtra("mUsertype", userType);
                                                     startActivity(intent);
                                                     finish();
-                                                }
-                                                else{
-                                                    Intent intent = new Intent(LoginActivity.this, StudentActivity.class);
-//                                                intent.putExtra("mUsertype", userType);
-                                                    startActivity(intent);
-                                                    finish();
-                                                }
-
                                             }
                                         }
                                         @Override
                                         public void onCancelled(DatabaseError databaseError) {
-//                System.out.println("The read failed: " + databaseError.getCode());
+                                            System.out.println("The read failed: " + databaseError.getCode());
                                         }
-                                    });
-
-
-
+                                    };
+                                    mDatabaseReference.child("Professors").child(user.getUid()).addValueEventListener(mValueEventListener);
+                                    mValueEventListener2 = new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            if(dataSnapshot.exists()) {
+                                                mDatabaseReference.child("Students").child(user.getUid()).removeEventListener(mValueEventListener2);
+                                                mDatabaseReference.child("Students").child(user.getUid()).child("token").setValue(refreshedToken);
+                                                Intent intent = new Intent(LoginActivity.this, StudentActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+                                        }
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+                                            System.out.println("The read failed: " + databaseError.getCode());
+                                        }
+                                    };
+                                    mDatabaseReference.child("Students").child(user.getUid()).addValueEventListener(mValueEventListener2);
 
                                 }
                             }

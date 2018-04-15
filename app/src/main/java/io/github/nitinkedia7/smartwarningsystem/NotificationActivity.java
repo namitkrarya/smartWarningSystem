@@ -46,11 +46,12 @@ public class NotificationActivity extends AppCompatActivity {
 
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mDatabaseReference;
+    private DatabaseReference mSessionReference;
     private FirebaseAuth mFirebaseAuth;
-    private String status;
-    private String fullName, isBlacklisted;
-    private String comment, state;
     private ChildEventListener mChildEventListener;
+    private boolean status;
+    private String fullName, isBlacklisted;
+    private String comment, state, sessionName;
     private CountDownTimer timer;
 
     @Override
@@ -58,31 +59,22 @@ public class NotificationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notification);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        sessionName = getIntent().getStringExtra("session_name");
+        fullName = getIntent().getStringExtra("fullName");
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
+        mSessionReference = mDatabaseReference.child("Sessions").child(sessionName);
+
         mFirebaseAuth = FirebaseAuth.getInstance();
         final FirebaseUser user = mFirebaseAuth.getCurrentUser();
         // Attach a listener to read the data at our posts reference
-        mDatabaseReference.child("session").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                status = dataSnapshot.child("state").getValue().toString();
-                if(dataSnapshot.child("joinedUsers").child(user.getUid()).child("isBlacklisted").getValue() != null) {
-                    isBlacklisted = dataSnapshot.child("joinedUsers").child(user.getUid()).child("isBlacklisted").getValue().toString();
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-//                System.out.println("The read failed: " + databaseError.getCode());
-            }
-        });
 
-        mDatabaseReference.child("additionalUserData").child(user.getUid()).child("fullName").addValueEventListener(new ValueEventListener() {
+        mSessionReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getValue()!=null) {
-                    fullName = dataSnapshot.getValue().toString();
-                }
+                mSessionReference.removeEventListener(this);
+                status = Boolean.valueOf(dataSnapshot.child("isActive").getValue().toString());
+                isBlacklisted = dataSnapshot.child("joinedUsers").child(user.getUid()).child("isBlacklisted").getValue().toString();
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -95,17 +87,17 @@ public class NotificationActivity extends AppCompatActivity {
             public void onTick(long millisUntilFinished) {
                 Long remainingSec = millisUntilFinished/1000;
 
-                if (remainingSec % 10 == 0 && status.equals("ACTIVE")) {
+                if (remainingSec % 10 == 0 && status) {
                     Random rand = new Random();
-
                     Integer randState = rand.nextInt(10)+1;
-                    StudentState studentState = new StudentState(fullName,randState, isBlacklisted, "none", user.getUid());
-                    mDatabaseReference.child("session").child("joinedUsers").child(user.getUid()).setValue(studentState);
+                    StudentState studentState = new StudentState(fullName,randState, isBlacklisted, "None", user.getUid());
+                    mSessionReference.child("joinedUsers").child(user.getUid()).setValue(studentState);
                     if(mChildEventListener == null) {
                         mChildEventListener = new ChildEventListener() {
                             @Override
                             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                                 Alert alert = dataSnapshot.getValue(Alert.class);
+
                                 state = alert.body;
                                 comment = alert.title;
                                 prepareAlertData(state, comment);
@@ -131,7 +123,8 @@ public class NotificationActivity extends AppCompatActivity {
 
                             }
                         };
-                        mDatabaseReference.child("session").child("alerts").child(user.getUid()).child("sentAlerts").addChildEventListener(mChildEventListener);
+                        mSessionReference.child("alerts").child(user.getUid()).child("sentAlerts").addChildEventListener(mChildEventListener);
+
                     }
                 }
             }
@@ -176,7 +169,6 @@ public class NotificationActivity extends AppCompatActivity {
     }
 
     private void prepareAlertData(final String state, final String comment) {
-
         final notification alert = new notification(true, state, comment , "10", "Enabled");
         notificationList.add(alert);
         final FirebaseUser user = mFirebaseAuth.getCurrentUser();
@@ -186,12 +178,7 @@ public class NotificationActivity extends AppCompatActivity {
                 Long remainingSec = millisUntilFinished/1000;
                 if(alert.getStatus().equals("Disabled")){
                     timer.cancel();
-                }
-//                if(remainingSec == 9) {
-//                    alert.setTime(Long.toString(remainingSec));
-//
-//                }
-                else{
+                } else{
                     alert.setTime(Long.toString(remainingSec));
                     recyclerView.setAdapter(mAdapter);
                 }
@@ -202,28 +189,21 @@ public class NotificationActivity extends AppCompatActivity {
                 alert.setStatus("Disabled");
                 alert.setClickable(false);
                 Alert unrespondedAlert = new Alert(alert.getState(), alert.getTime());
-                mDatabaseReference.child("session").child("alerts").child(user.getUid()).child("unresponsiveAlerts").push().setValue(unrespondedAlert);
-                mDatabaseReference.child("session").child("joinedUsers").child(user.getUid()).child("isBlacklisted").setValue("Blacklisted");
-
-
+                mSessionReference.child("alerts").child(user.getUid()).child("unresponsiveAlerts").push().setValue(unrespondedAlert);
+                mSessionReference.child("joinedUsers").child(user.getUid()).child("isBlacklisted").setValue("Blacklisted");
             }
         };
         timer.start();
-
         mAdapter.notifyDataSetChanged();
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                // API 5+ solution
-
-                onBackPressed();
+//                onBackPressed();
                 Intent intent = new Intent(NotificationActivity.this, StudentActivity.class);
                 NotificationActivity.this.startActivity(intent);
-
                 return true;
-
             default:
                 return super.onOptionsItemSelected(item);
         }

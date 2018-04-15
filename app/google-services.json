@@ -1,27 +1,35 @@
 {
   "project_info": {
-    "project_number": "148555717203",
-    "firebase_url": "https://smartwarningsystem-c573b.firebaseio.com",
-    "project_id": "smartwarningsystem-c573b",
-    "storage_bucket": "smartwarningsystem-c573b.appspot.com"
+    "project_number": "404245691480",
+    "firebase_url": "https://smartwarningsys.firebaseio.com",
+    "project_id": "smartwarningsys",
+    "storage_bucket": "smartwarningsys.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:148555717203:android:7e53cb257393bf2d",
+        "mobilesdk_app_id": "1:404245691480:android:7e53cb257393bf2d",
         "android_client_info": {
           "package_name": "io.github.nitinkedia7.smartwarningsystem"
         }
       },
       "oauth_client": [
         {
-          "client_id": "148555717203-t6e30br5011hbf2edm8tnbdmvkj0p5fv.apps.googleusercontent.com",
+          "client_id": "404245691480-kvnd3e0njd5gb493ahtmvfbhj3ianvft.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.github.nitinkedia7.smartwarningsystem",
+            "certificate_hash": "f473410e030b44c29ccb482b8fc80b487fa88f14"
+          }
+        },
+        {
+          "client_id": "404245691480-nrpuio2ph9e42gqi8gdlcgouhq7316tg.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAY5oAAWJgdMLttbyQ6kYdO6p4onWkHJoc"
+          "current_key": "AIzaSyDFiKP_EOQIvONZ040xOUWXYY9j4thvjw0"
         }
       ],
       "services": {
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "404245691480-nrpuio2ph9e42gqi8gdlcgouhq7316tg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

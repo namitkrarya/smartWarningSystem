@@ -48,6 +48,8 @@ public class ClassStatusActivity extends AppCompatActivity {
     private DatabaseReference mDatabaseReference;
     private FirebaseAuth mFirebaseAuth;
     private String status;
+    private String courseName;
+    private ValueEventListener mValueEventListener;
 
 
     @Override
@@ -55,7 +57,7 @@ public class ClassStatusActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_status);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        courseName = getIntent().getStringExtra("course_name");
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view_status);
 
@@ -70,19 +72,22 @@ public class ClassStatusActivity extends AppCompatActivity {
         mDatabaseReference = mFirebaseDatabase.getReference();
 
 
-        mDatabaseReference.child("session").child("joinedUsers").addListenerForSingleValueEvent(
-                new ValueEventListener() {
+        mValueEventListener = new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         //Get map of users in datasnapshot
                         prepareStatusData((Map<String,Object>) dataSnapshot.getValue());
+                        mDatabaseReference.child("Sessions").child(courseName).child("joinedUsers").removeEventListener(mValueEventListener);
                     }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                         //handle databaseError
                     }
-                });
+                };
+        mDatabaseReference.child("Sessions").child(courseName).child("joinedUsers").addValueEventListener(mValueEventListener);
+//
+
 
 //        prepareStatusData();
 

@@ -2,25 +2,36 @@ package io.github.nitinkedia7.smartwarningsystem;
 
 
 public class AdditionalUserInfo {
-    private String userType;
-
-
-
-    private String token;
     private String fullName;
+    private String isEngaged;
+    private String token;
 
-    public AdditionalUserInfo(String userType, String fullName, String token) {
+    public String getCurrentCourse() {
+        return currentCourse;
+    }
+
+    public void setCurrentCourse(String currentCourse) {
+        this.currentCourse = currentCourse;
+    }
+
+    private String currentCourse;
+
+    public AdditionalUserInfo() {
+    }
+
+    public AdditionalUserInfo(String fullName, String isEngaged, String token, String currentCourse) {
         this.fullName = fullName;
-        this.userType = userType;
+        this.currentCourse = currentCourse;
+        this.isEngaged = isEngaged;
         this.token = token;
 
     }
-    public String getUserType() {
-        return userType;
+    public String getIsEngaged() {
+        return isEngaged;
     }
 
-    public void setUserType(String userType) {
-        this.userType = userType;
+    public void setIsEngaged(String isEngaged) {
+        isEngaged = isEngaged;
     }
 
     public String getFullName() {

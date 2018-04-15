@@ -53,7 +53,8 @@ public class ClassReviewActivity extends AppCompatActivity {
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mDatabaseReference;
     private FirebaseAuth mFirebaseAuth;
-    private String status;
+    private String status, courseName;
+    private ValueEventListener mValueEventListener;
 
 
     @Override
@@ -61,7 +62,7 @@ public class ClassReviewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_class_review);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        courseName = getIntent().getStringExtra("course_name");
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view_review);
 
         mAdapter = new ClassReviewAdapter(studentList);
@@ -75,19 +76,21 @@ public class ClassReviewActivity extends AppCompatActivity {
         mDatabaseReference = mFirebaseDatabase.getReference();
 
 
-        mDatabaseReference.child("session").addListenerForSingleValueEvent(
-                new ValueEventListener() {
+        mValueEventListener = new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         //Get map of users in datasnapshot
-                        prepareStatusData((Map<String, Object>) dataSnapshot.child("joinedUsers").getValue());
+                        prepareStatusData((Map<String, Object>) dataSnapshot.getValue());
+                        mDatabaseReference.child("Sessions").child(courseName).child("joinedUsers").removeEventListener(mValueEventListener);
                     }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                         //handle databaseError
                     }
-                });
+                };
+        mDatabaseReference.child("Sessions").child(courseName).child("joinedUsers").addValueEventListener(mValueEventListener);
+//        mDatabaseReference.child("session").removeEventListener(mValueEventListener);
 
 //        prepareStatusData();
         recyclerView.addOnItemTouchListener(new NotificationTouchListener(getApplicationContext(), recyclerView, new NotificationTouchListener.ClickListener() {
@@ -109,7 +112,7 @@ public class ClassReviewActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
-                        mDatabaseReference.child("session").child("joinedUsers").child(student.getUid()).child("review").setValue(review.getText().toString());
+                        mDatabaseReference.child("Sessions").child(courseName).child("joinedUsers").child(student.getUid()).child("review").setValue(review.getText().toString());
                         student.setReview(review.getText().toString());
                         mAdapter.notifyItemChanged(position);
                         dialog.dismiss();
@@ -134,7 +137,6 @@ public class ClassReviewActivity extends AppCompatActivity {
 
     private void prepareStatusData(Map<String,Object> students) {
         //iterate through each user, ignoring their UID
-        Log.d("Review", Integer.toString(students.size()));
         for (Map.Entry<String, Object> entry : students.entrySet()){
 
             //Get user map
