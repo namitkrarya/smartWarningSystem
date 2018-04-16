@@ -40,14 +40,12 @@ import java.util.Map;
 import java.util.Random;
 
 public class ClassStatusActivity extends AppCompatActivity {
-    private List<ClassStatus> studentList = new ArrayList<>();
+    private List<StudentState> studentList = new ArrayList<>();
     private RecyclerView recyclerView;
     private ClassStatusAdapter mAdapter;
 
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mDatabaseReference;
-    private FirebaseAuth mFirebaseAuth;
-    private String status;
     private String courseName;
     private ValueEventListener mValueEventListener;
 
@@ -55,11 +53,11 @@ public class ClassStatusActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_status);
+        setContentView(R.layout.activity_notification);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         courseName = getIntent().getStringExtra("course_name");
 
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view_status);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
         mAdapter = new ClassStatusAdapter(studentList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -97,24 +95,14 @@ public class ClassStatusActivity extends AppCompatActivity {
 
     private void prepareStatusData(Map<String,Object> students) {
 
-//        ArrayList<Long> phoneNumbers = new ArrayList<>();
-
         //iterate through each user, ignoring their UID
         for (Map.Entry<String, Object> entry : students.entrySet()){
-
             //Get user map
             Map singleUser = (Map) entry.getValue();
             //Get phone field and append to list
-            Log.d("ClassStatusActivity", singleUser.get("name").toString());
-            ClassStatus student = new ClassStatus(singleUser.get("state").toString(), singleUser.get("isBlacklisted").toString(), singleUser.get("name").toString());
+            StudentState student = new StudentState(singleUser.get("name").toString(),Integer.valueOf(singleUser.get("state").toString()), singleUser.get("isBlacklisted").toString(), "None", "None");
             studentList.add(student);
-//            phoneNumbers.add((Long) singleUser.get("phone"));
         }
-
-//        System.out.println(phoneNumbers.toString());
-
-
-
         mAdapter.notifyDataSetChanged();
     }
 
@@ -122,7 +110,6 @@ public class ClassStatusActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                // API 5+ solution
                 onBackPressed();
                 Intent intent = new Intent(ClassStatusActivity.this, MainActivity.class);
                 ClassStatusActivity.this.startActivity(intent);

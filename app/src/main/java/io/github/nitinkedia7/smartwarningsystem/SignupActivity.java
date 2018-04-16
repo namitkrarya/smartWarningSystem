@@ -63,67 +63,61 @@ public class SignupActivity extends AppCompatActivity {
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                fullName = inputName.getText().toString().trim();
-                String email = inputEmail.getText().toString().trim();
-                String password = inputPassword.getText().toString().trim();
-                int selectedId = userTypeOptions.getCheckedRadioButtonId();
-                inputUserType = (RadioButton) findViewById(selectedId);
-                userType = inputUserType.getText().toString();
+            fullName = inputName.getText().toString().trim();
+            String email = inputEmail.getText().toString().trim();
+            String password = inputPassword.getText().toString().trim();
+            int selectedId = userTypeOptions.getCheckedRadioButtonId();
+            inputUserType = (RadioButton) findViewById(selectedId);
+            userType = inputUserType.getText().toString();
 
-                if (TextUtils.isEmpty(fullName)) {
-                    Toast.makeText(getApplicationContext(), "Enter your name!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if (TextUtils.isEmpty(email)) {
-                    Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if (TextUtils.isEmpty(password)) {
-                    Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if (password.length() < 6) {
-                    Toast.makeText(getApplicationContext(), "Password too short, enter minimum 6 characters!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                progressBar.setVisibility(View.VISIBLE);
-                //create user
-                auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                Toast.makeText(SignupActivity.this, "createUserWithEmail:onComplete:" + task.isSuccessful(), Toast.LENGTH_SHORT).show();
-                                progressBar.setVisibility(View.GONE);
-                                // If sign in fails, display a message to the user. If sign in succeeds
-                                // the auth state listener will be notified and logic to handle the
-                                // signed in user can be handled in the listener.
-                                if (!task.isSuccessful()) {
-                                    Toast.makeText(SignupActivity.this, "Authentication failed." + task.getException(),
-                                            Toast.LENGTH_SHORT).show();
-                                } else {
-                                    FirebaseUser user = auth.getCurrentUser();
-                                    String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-                                    AdditionalUserInfo userinfo = new AdditionalUserInfo(fullName, "false", refreshedToken, "None");
-                                    if (userType.equals("Professor")) {
-                                        mDatabaseReference.child("Professors").child(user.getUid()).setValue(userinfo);
-                                        Intent intent = new Intent(SignupActivity.this, MainActivity.class);
-                                        startActivity(intent);
-                                        finish();
-                                    } else {
-                                        mDatabaseReference.child("Students").child(user.getUid()).setValue(userinfo);
-                                        Intent intent = new Intent(SignupActivity.this, StudentActivity.class);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                                }
-                            }
-                        });
+            if (TextUtils.isEmpty(fullName)) {
+                Toast.makeText(getApplicationContext(), "Enter your name!", Toast.LENGTH_SHORT).show();
+                return;
             }
-        });
+
+            if (TextUtils.isEmpty(email)) {
+                Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (TextUtils.isEmpty(password)) {
+                Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            progressBar.setVisibility(View.VISIBLE);
+            //create user
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                    Toast.makeText(SignupActivity.this, "createUserWithEmail:onComplete:" + task.isSuccessful(), Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
+                    // If sign in fails, display a message to the user. If sign in succeeds
+                    // the auth state listener will be notified and logic to handle the
+                    // signed in user can be handled in the listener.
+                    if (!task.isSuccessful()) {
+                        Toast.makeText(SignupActivity.this, "Authentication failed." + task.getException(), Toast.LENGTH_SHORT).show();
+                    } else {
+                        FirebaseUser user = auth.getCurrentUser();
+                        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+                        AdditionalUserInfo userinfo = new AdditionalUserInfo(fullName, "false", refreshedToken, "None");
+                        if (userType.equals("Professor")) {
+                            mDatabaseReference.child("Professors").child(user.getUid()).setValue(userinfo);
+                            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            mDatabaseReference.child("Students").child(user.getUid()).setValue(userinfo);
+                            Intent intent = new Intent(SignupActivity.this, StudentActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    }
+                    }
+                });
+        }
+    });
     }
 
     @Override

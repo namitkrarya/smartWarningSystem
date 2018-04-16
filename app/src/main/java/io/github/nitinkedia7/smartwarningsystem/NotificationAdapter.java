@@ -20,7 +20,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView state, time, comment, status;
-        public boolean isClickable = true;
 
         public MyViewHolder(View view) {
             super(view);
@@ -48,7 +47,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     public void onBindViewHolder(MyViewHolder holder, int position) {
         notification notification = notificationsList.get(position);
         holder.status.setText(notification.getStatus());
-        holder.state.setText(notification.getState());
+        holder.state.setText("State : " + notification.getState());
         holder.comment.setText(notification.getComment());
         holder.time.setText(notification.getTime());
     }

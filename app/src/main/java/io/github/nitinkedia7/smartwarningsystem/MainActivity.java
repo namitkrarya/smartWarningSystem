@@ -81,174 +81,165 @@ public class MainActivity extends AppCompatActivity {
         mClassReviewButton = (Button) findViewById(R.id.classReviewButton);
 
         mProfessorDatabaseReference.child(user.getUid()).child("currentCourse").addListenerForSingleValueEvent(
+            new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    mProfessorDatabaseReference.child(user.getUid()).child("currentCourse").removeEventListener(this);
+                    course_name = dataSnapshot.getValue().toString();
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    //handle databaseError
+                }
+            });
+
+        mCreateSessionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+            mProfessorDatabaseReference.child(user.getUid()).child("isEngaged").addListenerForSingleValueEvent(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        mProfessorDatabaseReference.child(user.getUid()).child("currentCourse").removeEventListener(this);
-                        course_name = dataSnapshot.getValue().toString();
+                        if(!Boolean.valueOf(dataSnapshot.getValue().toString())) {
+                            mProfessorDatabaseReference.child(user.getUid()).child("isEngaged").removeEventListener(this);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this, R.style.MyDialogTheme);
+                            builder.setTitle("Enter Course Details");
+                            View viewInflated = getLayoutInflater().inflate(R.layout.create_session_dialog, (ViewGroup) null, false);
+                            final EditText courseName = (EditText) viewInflated.findViewById(R.id.courseName);
+                            final EditText sessionPassword = (EditText) viewInflated.findViewById(R.id.sessionPassword);
+                            builder.setView(viewInflated);
+                            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    session_password = sessionPassword.getText().toString();
+                                    course_name = courseName.getText().toString();
+                                    saveSessionDetails(user.getUid(), course_name, session_password);
+                                    dialog.dismiss();
+                                }
+                            });
+                            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                }
+                            });
+                            builder.show();
+                        } else {
+                            Toast.makeText(MainActivity.this, "Current Course is Active", Toast.LENGTH_LONG).show();
+                        }
                     }
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                         //handle databaseError
                     }
                 });
-
-        mCreateSessionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mProfessorDatabaseReference.child(user.getUid()).child("isEngaged").addListenerForSingleValueEvent(
-                        new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                if(!Boolean.valueOf(dataSnapshot.getValue().toString())) {
-                                    mProfessorDatabaseReference.child(user.getUid()).child("isEngaged").removeEventListener(this);
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this, R.style.MyDialogTheme);
-                                    builder.setTitle("Enter Course Details");
-                                    View viewInflated = getLayoutInflater().inflate(R.layout.create_session_dialog, (ViewGroup) null, false);
-                                    final EditText courseName = (EditText) viewInflated.findViewById(R.id.courseName);
-                                    final EditText sessionPassword = (EditText) viewInflated.findViewById(R.id.sessionPassword);
-                                    builder.setView(viewInflated);
-                                    builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            session_password = sessionPassword.getText().toString();
-                                            course_name = courseName.getText().toString();
-                                            // TODO Add listener
-                                            mProfessorDatabaseReference.child(user.getUid()).child("isEngaged").setValue("true");
-                                            mProfessorDatabaseReference.child(user.getUid()).child("currentCourse").setValue(course_name);
-
-                                            mSessionDatabaseReference.child(course_name).child("isActive").setValue(true);
-                                            mSessionDatabaseReference.child(course_name).child("isUserJoined").setValue(false);
-                                            mSessionDatabaseReference.child(course_name).child("sessionPassword").setValue(session_password);
-                                            mSessionDatabaseReference.child(course_name).child("alerts").setValue("None");
-                                            mSessionDatabaseReference.child(course_name).child("joinedUsers").setValue("None");
-                                            Toast.makeText(MainActivity.this, "Successfully created session!", Toast.LENGTH_LONG).show();
-                                            dialog.dismiss();
-                                        }
-                                    });
-                                    builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            dialog.cancel();
-                                        }
-                                    });
-                                    builder.show();
-                                } else {
-                                    Toast.makeText(MainActivity.this, "Current Course is Active", Toast.LENGTH_LONG).show();
-                                }
-                            }
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                //handle databaseError
-                            }
-                        });
             }
         });
 
         mEndSessionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(course_name.equals("None")){
-                    Toast.makeText(MainActivity.this, "You are not running any course :(", Toast.LENGTH_LONG).show();
-                }
-                else {
-                    mSessionDatabaseReference.child(course_name).addListenerForSingleValueEvent(
-                            new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    if (dataSnapshot.exists()) {
-                                        mSessionDatabaseReference.child(course_name).removeEventListener(this);
-                                        mSessionDatabaseReference.child(course_name).child("joinedUsers").addListenerForSingleValueEvent(
-                                                new ValueEventListener() {
-                                                    @Override
-                                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                                        disengageStudents((Map<String, Object>) dataSnapshot.getValue());
-                                                    }
+            if(course_name.equals("None")){
+                Toast.makeText(MainActivity.this, "You are not running any course :(", Toast.LENGTH_LONG).show();
+            }
+            else {
+                mSessionDatabaseReference.child(course_name).addListenerForSingleValueEvent(
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                mSessionDatabaseReference.child(course_name).removeEventListener(this);
+                                mSessionDatabaseReference.child(course_name).child("joinedUsers").addListenerForSingleValueEvent(
+                                    new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            disengageStudents((Map<String, Object>) dataSnapshot.getValue());
+                                        }
 
-                                                    @Override
-                                                    public void onCancelled(DatabaseError databaseError) {
-                                                        //handle databaseError
-                                                    }
-                                                });
-                                        mProfessorDatabaseReference.child(user.getUid()).child("isEngaged").setValue("false");
-                                        mProfessorDatabaseReference.child(user.getUid()).child("currentCourse").setValue("None");
-                                        mSessionDatabaseReference.child(course_name).child("isActive").setValue(false);
-                                        Toast.makeText(MainActivity.this, "Session ended successfully!", Toast.LENGTH_LONG).show();
-                                    } else {
-                                        Toast.makeText(MainActivity.this, "No course created", Toast.LENGTH_LONG).show();
-                                    }
-                                }
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+                                            //handle databaseError
+                                        }
+                                    });
+                                mProfessorDatabaseReference.child(user.getUid()).child("isEngaged").setValue("false");
+                                mProfessorDatabaseReference.child(user.getUid()).child("currentCourse").setValue("None");
+                                mSessionDatabaseReference.child(course_name).child("isActive").setValue(false);
+                                Toast.makeText(MainActivity.this, "Session ended successfully!", Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(MainActivity.this, "No course created", Toast.LENGTH_LONG).show();
+                            }
+                        }
 
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-                                    //handle databaseError
-                                }
-                            });
-                }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            //handle databaseError
+                        }
+                    });
+            }
             }
         });
 
         mClassStatusButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(course_name.equals("None")){
-                    Toast.makeText(MainActivity.this, "You are not running any course :(", Toast.LENGTH_LONG).show();
-                }
-                else {
-                    mSessionDatabaseReference.child(course_name).child("isUserJoined").addListenerForSingleValueEvent(
-                            new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    if (Boolean.valueOf(dataSnapshot.getValue().toString())) {
-                                        mSessionDatabaseReference.child(course_name).child("isUserJoined").removeEventListener(this);
-                                        Toast.makeText(MainActivity.this, "Showing class status!", Toast.LENGTH_LONG).show();
-                                        Intent intent = new Intent(MainActivity.this, ClassStatusActivity.class);
-                                        intent.putExtra("course_name", course_name);
-                                        MainActivity.this.startActivity(intent);
-                                        finish();
-                                    } else {
-                                        Toast.makeText(MainActivity.this, "No Students Joined!", Toast.LENGTH_LONG).show();
-                                    }
-                                }
+            if(course_name.equals("None")){
+                Toast.makeText(MainActivity.this, "You are not running any course :(", Toast.LENGTH_LONG).show();
+            }
+            else {
+                mSessionDatabaseReference.child(course_name).child("isUserJoined").addListenerForSingleValueEvent(
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (Boolean.valueOf(dataSnapshot.getValue().toString())) {
+                                mSessionDatabaseReference.child(course_name).child("isUserJoined").removeEventListener(this);
+                                Toast.makeText(MainActivity.this, "Showing class status!", Toast.LENGTH_LONG).show();
+                                Intent intent = new Intent(MainActivity.this, ClassStatusActivity.class);
+                                intent.putExtra("course_name", course_name);
+                                MainActivity.this.startActivity(intent);
+                                finish();
+                            } else {
+                                Toast.makeText(MainActivity.this, "No Students Joined!", Toast.LENGTH_LONG).show();
+                            }
+                        }
 
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-                                    //handle databaseError
-                                }
-                            });
-                }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            //handle databaseError
+                        }
+                    });
+            }
             }
         });
 
         mClassReviewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(course_name.equals("None")){
-                    Toast.makeText(MainActivity.this, "You are not running any course :(", Toast.LENGTH_LONG).show();
-                }
-                else {
-                    mSessionDatabaseReference.child(course_name).child("isUserJoined").addListenerForSingleValueEvent(
-                            new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    if (Boolean.valueOf(dataSnapshot.getValue().toString())) {
-                                        mSessionDatabaseReference.child(course_name).child("isUserJoined").removeEventListener(this);
-                                        Toast.makeText(MainActivity.this, "Showing class review!", Toast.LENGTH_LONG).show();
-                                        Intent intent = new Intent(MainActivity.this, ClassReviewActivity.class);
-                                        intent.putExtra("course_name", course_name);
-                                        MainActivity.this.startActivity(intent);
-                                        finish();
-                                    } else {
-                                        Toast.makeText(MainActivity.this, "No Students Joined!", Toast.LENGTH_LONG).show();
-                                    }
-                                }
+            if(course_name.equals("None")){
+                Toast.makeText(MainActivity.this, "You are not running any course :(", Toast.LENGTH_LONG).show();
+            }
+            else {
+                mSessionDatabaseReference.child(course_name).child("isUserJoined").addListenerForSingleValueEvent(
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (Boolean.valueOf(dataSnapshot.getValue().toString())) {
+                                mSessionDatabaseReference.child(course_name).child("isUserJoined").removeEventListener(this);
+                                Toast.makeText(MainActivity.this, "Showing class review!", Toast.LENGTH_LONG).show();
+                                Intent intent = new Intent(MainActivity.this, ClassReviewActivity.class);
+                                intent.putExtra("course_name", course_name);
+                                MainActivity.this.startActivity(intent);
+                                finish();
+                            } else {
+                                Toast.makeText(MainActivity.this, "No Students Joined!", Toast.LENGTH_LONG).show();
+                            }
+                        }
 
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-                                    //handle databaseError
-                                }
-                            });
-                }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            //handle databaseError
+                        }
+                    });
+            }
             }
         });
     }
@@ -282,6 +273,18 @@ public class MainActivity extends AppCompatActivity {
             mStudentDatabaseReference.child(uid).child("currentCourse").setValue("None");
         }
 
+    }
+
+    private void saveSessionDetails(final String uid, final String course_name, final String session_password){
+        mProfessorDatabaseReference.child(uid).child("isEngaged").setValue("true");
+        mProfessorDatabaseReference.child(uid).child("currentCourse").setValue(course_name);
+
+        mSessionDatabaseReference.child(course_name).child("isActive").setValue(true);
+        mSessionDatabaseReference.child(course_name).child("isUserJoined").setValue(false);
+        mSessionDatabaseReference.child(course_name).child("sessionPassword").setValue(session_password);
+        mSessionDatabaseReference.child(course_name).child("alerts").setValue("None");
+        mSessionDatabaseReference.child(course_name).child("joinedUsers").setValue("None");
+        Toast.makeText(MainActivity.this, "Successfully created session!", Toast.LENGTH_LONG).show();
     }
 
 }

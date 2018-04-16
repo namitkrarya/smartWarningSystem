@@ -1,7 +1,6 @@
 package io.github.nitinkedia7.smartwarningsystem;
 
 public class notification {
-    private boolean isClickable;
     private String state, comment;
     private String time;
     private String status;
@@ -9,20 +8,11 @@ public class notification {
     public notification() {
     }
 
-    public notification(boolean isClickable, String state, String comment, String time, String status) {
+    public notification(String state, String comment, String time, String status) {
         this.state = state;
-        this.isClickable = isClickable;
         this.comment = comment;
         this.time = time;
         this.status = status;
-    }
-
-    public boolean getClickable(){
-        return isClickable;
-    }
-
-    public void setClickable(boolean isClickable){
-        this.isClickable = isClickable;
     }
 
     public String getStatus(){

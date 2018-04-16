@@ -16,7 +16,7 @@ import java.util.List;
 
 public class ClassStatusAdapter extends RecyclerView.Adapter<ClassStatusAdapter.MyViewHolder> {
 
-    private List<ClassStatus> studentList;
+    private List<StudentState> studentList;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView state, name, status;
@@ -30,7 +30,7 @@ public class ClassStatusAdapter extends RecyclerView.Adapter<ClassStatusAdapter.
     }
 
 
-    public ClassStatusAdapter(List<ClassStatus> studentList) {
+    public ClassStatusAdapter(List<StudentState> studentList) {
         this.studentList = studentList;
     }
 
@@ -44,8 +44,8 @@ public class ClassStatusAdapter extends RecyclerView.Adapter<ClassStatusAdapter.
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        ClassStatus class_status = studentList.get(position);
-        holder.status.setText(class_status.getStatus());
+       StudentState class_status = studentList.get(position);
+        holder.status.setText(class_status.getIsBlacklisted());
         holder.state.setText("State : " + class_status.getState());
         holder.name.setText(class_status.getName());
     }

@@ -72,7 +72,6 @@ public class NotificationActivity extends AppCompatActivity {
         mSessionReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mSessionReference.removeEventListener(this);
                 status = Boolean.valueOf(dataSnapshot.child("isActive").getValue().toString());
                 isBlacklisted = dataSnapshot.child("joinedUsers").child(user.getUid()).child("isBlacklisted").getValue().toString();
             }
@@ -83,24 +82,19 @@ public class NotificationActivity extends AppCompatActivity {
         });
 
         new CountDownTimer(300000, 1000) {
-
             public void onTick(long millisUntilFinished) {
                 Long remainingSec = millisUntilFinished/1000;
 
                 if (remainingSec % 10 == 0 && status) {
                     Random rand = new Random();
                     Integer randState = rand.nextInt(10)+1;
-                    StudentState studentState = new StudentState(fullName,randState, isBlacklisted, "None", user.getUid());
-                    mSessionReference.child("joinedUsers").child(user.getUid()).setValue(studentState);
+                    mSessionReference.child("joinedUsers").child(user.getUid()).child("state").setValue(randState.toString());
                     if(mChildEventListener == null) {
                         mChildEventListener = new ChildEventListener() {
                             @Override
                             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                                Alert alert = dataSnapshot.getValue(Alert.class);
-
-                                state = alert.body;
-                                comment = alert.title;
-                                prepareAlertData(state, comment);
+                                notification notification = dataSnapshot.getValue(notification.class);
+                                prepareAlertData(notification);
                             }
 
                             @Override
@@ -124,7 +118,6 @@ public class NotificationActivity extends AppCompatActivity {
                             }
                         };
                         mSessionReference.child("alerts").child(user.getUid()).child("sentAlerts").addChildEventListener(mChildEventListener);
-
                     }
                 }
             }
@@ -148,13 +141,11 @@ public class NotificationActivity extends AppCompatActivity {
             public void onClick(View view, int position) {
 
                 notification notification = notificationList.get(position);
-                if(notification.getClickable()) {
+                if(notification.getStatus().equals("Enabled")) {
                     Toast.makeText(getApplicationContext(), "Recorded your response", Toast.LENGTH_SHORT).show();
-                    notification.setClickable(false);
                     notification.setStatus("Disabled");
                     notification.setTime("Recorded your response");
                     recyclerView.setAdapter(mAdapter);
-
                 }
             }
 
@@ -163,33 +154,27 @@ public class NotificationActivity extends AppCompatActivity {
 
             }
         }));
-
-
-
     }
 
-    private void prepareAlertData(final String state, final String comment) {
-        final notification alert = new notification(true, state, comment , "10", "Enabled");
-        notificationList.add(alert);
+    private void prepareAlertData(final notification notification) {
+        notificationList.add(notification);
         final FirebaseUser user = mFirebaseAuth.getCurrentUser();
         timer = new CountDownTimer(10000, 1000) {
 
             public void onTick(long millisUntilFinished) {
                 Long remainingSec = millisUntilFinished/1000;
-                if(alert.getStatus().equals("Disabled")){
+                if(notification.getStatus().equals("Disabled")){
                     timer.cancel();
                 } else{
-                    alert.setTime(Long.toString(remainingSec));
+                    notification.setTime(Long.toString(remainingSec));
                     recyclerView.setAdapter(mAdapter);
                 }
 
             }
             public void onFinish() {
-                alert.setTime("Time Up");
-                alert.setStatus("Disabled");
-                alert.setClickable(false);
-                Alert unrespondedAlert = new Alert(alert.getState(), alert.getTime());
-                mSessionReference.child("alerts").child(user.getUid()).child("unresponsiveAlerts").push().setValue(unrespondedAlert);
+                notification.setTime("Time Up");
+                notification.setStatus("Disabled");
+                mSessionReference.child("alerts").child(user.getUid()).child("unresponsiveAlerts").push().setValue(notification);
                 mSessionReference.child("joinedUsers").child(user.getUid()).child("isBlacklisted").setValue("Blacklisted");
             }
         };
@@ -200,7 +185,6 @@ public class NotificationActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-//                onBackPressed();
                 Intent intent = new Intent(NotificationActivity.this, StudentActivity.class);
                 NotificationActivity.this.startActivity(intent);
                 return true;

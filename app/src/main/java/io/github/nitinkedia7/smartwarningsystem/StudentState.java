@@ -10,8 +10,6 @@ public class StudentState {
     private Integer state;
     private String isBlacklisted;
     private String review;
-
-
     private String uid;
 
     public String getReview() {

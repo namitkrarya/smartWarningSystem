@@ -70,7 +70,6 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String email = inputEmail.getText().toString();
-                String usert;
                 final String password = inputPassword.getText().toString();
 
                 if (TextUtils.isEmpty(email)) {
@@ -96,11 +95,7 @@ public class LoginActivity extends AppCompatActivity {
                                 progressBar.setVisibility(View.GONE);
                                 if (!task.isSuccessful()) {
                                     // there was an error
-                                    if (password.length() < 6) {
-                                        inputPassword.setError(getString(R.string.minimum_password));
-                                    } else {
-                                        Toast.makeText(LoginActivity.this, getString(R.string.auth_failed), Toast.LENGTH_LONG).show();
-                                    }
+                                    Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_LONG).show();
                                 } else {
                                     final FirebaseUser user = auth.getCurrentUser();
                                     final String refreshedToken = FirebaseInstanceId.getInstance().getToken();
@@ -138,7 +133,6 @@ public class LoginActivity extends AppCompatActivity {
                                         }
                                     };
                                     mDatabaseReference.child("Students").child(user.getUid()).addValueEventListener(mValueEventListener2);
-
                                 }
                             }
                         });

@@ -87,108 +87,84 @@ public class StudentActivity extends AppCompatActivity {
         mJoinSessionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mValueEventListener = new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        isEngaged = Boolean.valueOf(dataSnapshot.child("isEngaged").getValue().toString());
-                        Log.d("Student", String.valueOf(isEngaged));
-                        mStudentDatabaseReference.child(uid).removeEventListener(mValueEventListener);
+            mValueEventListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    isEngaged = Boolean.valueOf(dataSnapshot.child("isEngaged").getValue().toString());
+                    Log.d("Student", String.valueOf(isEngaged));
+                    mStudentDatabaseReference.child(uid).removeEventListener(mValueEventListener);
 
-                        if (!isEngaged) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(StudentActivity.this, R.style.MyDialogTheme);
-                            builder.setTitle("Enter Session Details");
-                            View viewInflated = getLayoutInflater().inflate(R.layout.join_session_dialog, (ViewGroup) null, false);
-                            // Set up the input
-                            final EditText courseName = (EditText) viewInflated.findViewById(R.id.courseToJoin);
-                            final EditText sessionPassword = (EditText) viewInflated.findViewById(R.id.sessionPassword);
-                            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                            builder.setView(viewInflated);
+                    if (!isEngaged) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(StudentActivity.this, R.style.MyDialogTheme);
+                        builder.setTitle("Enter Session Details");
+                        View viewInflated = getLayoutInflater().inflate(R.layout.join_session_dialog, (ViewGroup) null, false);
+                        // Set up the input
+                        final EditText courseName = (EditText) viewInflated.findViewById(R.id.courseToJoin);
+                        final EditText sessionPassword = (EditText) viewInflated.findViewById(R.id.sessionPassword);
+                        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+                        builder.setView(viewInflated);
 
 
-                            // Set up the buttons
-                            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        // Set up the buttons
+                        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            session_name = courseName.getText().toString();
+                            mValueEventListener2 = new ValueEventListener() {
                                 @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    session_name = courseName.getText().toString();
-                                    mValueEventListener2 = new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                            if (dataSnapshot.exists()) {
-                                                if (Boolean.valueOf(dataSnapshot.child("isActive").getValue().toString())) {
-                                                    session_password = dataSnapshot.child("sessionPassword").getValue().toString();
-                                                    if (session_password.equals(sessionPassword.getText().toString())) {
-                                                        mSessionDatabaseReference.child(courseName.getText().toString()).removeEventListener(mValueEventListener2);
-                                                        StudentState studentState = new StudentState(fullName, 10, "Not Blacklisted", "None", user.getUid());
-                                                        mSessionDatabaseReference.child(session_name).child("joinedUsers").child(uid).setValue(studentState);
-                                                        mSessionDatabaseReference.child(session_name).child("isUserJoined").setValue(true);
-                                                        mSessionDatabaseReference.child(session_name).child("alerts").child(uid).child("sentAlerts").setValue("None");
-                                                        mSessionDatabaseReference.child(session_name).child("alerts").child(uid).child("unresponsiveAlerts").setValue("None");
-                                                        mStudentDatabaseReference.child(uid).child("isEngaged").setValue("true");
-                                                        mStudentDatabaseReference.child(uid).child("currentCourse").setValue(session_name);
-                                                        Toast.makeText(StudentActivity.this, "Successfully Joined Session!", Toast.LENGTH_SHORT).show();
-                                                        Intent intent = new Intent(StudentActivity.this, NotificationActivity.class);
-                                                        intent.putExtra("session_name", session_name);
-                                                        intent.putExtra("fullName", fullName);
-                                                        StudentActivity.this.startActivity(intent);
-                                                        finish();
-                                                    } else {
-                                                        Toast.makeText(StudentActivity.this, "Password doesn't match", Toast.LENGTH_SHORT).show();
-                                                    }
-                                                } else {
-                                                    Toast.makeText(StudentActivity.this, "Session has been ended.", Toast.LENGTH_SHORT).show();
-                                                }
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    if (dataSnapshot.exists()) {
+                                        if (Boolean.valueOf(dataSnapshot.child("isActive").getValue().toString())) {
+                                            session_password = dataSnapshot.child("sessionPassword").getValue().toString();
+                                            if (session_password.equals(sessionPassword.getText().toString())) {
+                                                mSessionDatabaseReference.child(courseName.getText().toString()).removeEventListener(mValueEventListener2);
+                                                StudentState studentState = new StudentState(fullName, 10, "Not Blacklisted", "None", user.getUid());
+                                                saveUsertoSession(uid, session_name, studentState);
+                                                Intent intent = new Intent(StudentActivity.this, NotificationActivity.class);
+                                                intent.putExtra("session_name", session_name);
+                                                intent.putExtra("fullName", fullName);
+                                                StudentActivity.this.startActivity(intent);
+                                                finish();
                                             } else {
-                                                Toast.makeText(StudentActivity.this, "Course Name doesn't exist.", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(StudentActivity.this, "Password doesn't match", Toast.LENGTH_SHORT).show();
                                             }
+                                        } else {
+                                            Toast.makeText(StudentActivity.this, "Session has been ended.", Toast.LENGTH_SHORT).show();
                                         }
-
-                                        @Override
-                                        public void onCancelled(DatabaseError databaseError) {
-//                              System.out.println("The read failed: " + databaseError.getCode());
-                                        }
-                                    };
-                                    mSessionDatabaseReference.child(courseName.getText().toString()).addValueEventListener(mValueEventListener2);
-                                    dialog.dismiss();
+                                    } else {
+                                        Toast.makeText(StudentActivity.this, "Course Name doesn't exist.", Toast.LENGTH_SHORT).show();
+                                    }
                                 }
-                            });
-                            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+
                                 @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.cancel();
+                                public void onCancelled(DatabaseError databaseError) {
+//                                      System.out.println("The read failed: " + databaseError.getCode());
                                 }
-                            });
-                            builder.show();
+                            };
+                            mSessionDatabaseReference.child(courseName.getText().toString()).addValueEventListener(mValueEventListener2);
+                            dialog.dismiss();
+                            }
+                        });
+                        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                        builder.show();
 
-                        } else {
-//                            mStudentDatabaseReference.child(user.getUid()).addListenerForSingleValueEvent(
-//                                    new ValueEventListener() {
-//                                        @Override
-//                                        public void onDataChange(DataSnapshot dataSnapshot) {
-//                                            mSessionDatabaseReference.child(user.getUid()).removeEventListener(this);
-//                                            Toast.makeText(StudentActivity.this, "Already joined a session.", Toast.LENGTH_SHORT).show();
-//                                            Intent intent = new Intent(StudentActivity.this, NotificationActivity.class);
-//                                            intent.putExtra("session_name", dataSnapshot.child("currentCourse").getValue().toString());
-//                                            intent.putExtra("fullName", dataSnapshot.child("fullName").getValue().toString());
-//                                            StudentActivity.this.startActivity(intent);
-//                                            finish();
-//                                        }
-//
-//                                        @Override
-//                                        public void onCancelled(DatabaseError databaseError) {
-//                                            //handle databaseError
-//                                        }
-//                                    });
-                            Toast.makeText(StudentActivity.this, "Already joined a session.", Toast.LENGTH_SHORT).show();
-                            finish();
-                        }
+                    } else {
+                        Toast.makeText(StudentActivity.this, "Already joined a session.", Toast.LENGTH_SHORT).show();
+                        finish();
                     }
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 //                              System.out.println("The read failed: " + databaseError.getCode());
-                    }
-                };
-                mStudentDatabaseReference.child(uid).addValueEventListener(mValueEventListener);
-                Log.d("Activity", String.valueOf(isEngaged));
+                }
+            };
+            mStudentDatabaseReference.child(uid).addValueEventListener(mValueEventListener);
+            Log.d("Activity", String.valueOf(isEngaged));
 
             }
 
@@ -213,5 +189,15 @@ public class StudentActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void saveUsertoSession(final String uid,final String session_name, final StudentState student){
+        mSessionDatabaseReference.child(session_name).child("joinedUsers").child(uid).setValue(student);
+        mSessionDatabaseReference.child(session_name).child("isUserJoined").setValue(true);
+        mSessionDatabaseReference.child(session_name).child("alerts").child(uid).child("sentAlerts").setValue("None");
+        mSessionDatabaseReference.child(session_name).child("alerts").child(uid).child("unresponsiveAlerts").setValue("None");
+        mStudentDatabaseReference.child(uid).child("isEngaged").setValue("true");
+        mStudentDatabaseReference.child(uid).child("currentCourse").setValue(session_name);
+        Toast.makeText(StudentActivity.this, "Successfully Joined Session!", Toast.LENGTH_SHORT).show();
     }
 }

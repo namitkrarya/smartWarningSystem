@@ -60,10 +60,10 @@ public class ClassReviewActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_class_review);
+        setContentView(R.layout.activity_notification);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         courseName = getIntent().getStringExtra("course_name");
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view_review);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
         mAdapter = new ClassReviewAdapter(studentList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
