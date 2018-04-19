@@ -15,12 +15,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".NotificationActivity" />
+        <activity android:name=".NotificationActivity" android:label ="Notification Pane" />
         <activity android:name=".SignupActivity" />
         <activity android:name=".MainActivity" />
-        <activity android:name=".ClassStatusActivity" />
-
-        <activity android:name=".ClassReviewActivity" />
+        <activity android:name=".ClassStatusActivity" android:label ="Class Status"/>
+        <activity android:name=".ClassReviewActivity" android:label ="Class Review"/>
         <activity android:name=".StudentActivity"></activity>
     </application>
 

@@ -100,7 +100,7 @@ public class ClassStatusActivity extends AppCompatActivity {
             //Get user map
             Map singleUser = (Map) entry.getValue();
             //Get phone field and append to list
-            StudentState student = new StudentState(singleUser.get("name").toString(),Integer.valueOf(singleUser.get("state").toString()), singleUser.get("isBlacklisted").toString(), "None", "None");
+            StudentState student = new StudentState(singleUser.get("name").toString(),Integer.valueOf(singleUser.get("state").toString()), singleUser.get("isBlacklisted").toString(), "None", "None", 0);
             studentList.add(student);
         }
         mAdapter.notifyDataSetChanged();

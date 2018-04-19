@@ -48,7 +48,7 @@ public class ClassReviewAdapter extends RecyclerView.Adapter<ClassReviewAdapter.
     public void onBindViewHolder(MyViewHolder holder, int position) {
         StudentState class_review = studentList.get(position);
         holder.status.setText(class_review.getIsBlacklisted());
-        holder.state.setText("State : " + class_review.getState());
+        holder.state.setText("State : " + class_review.getBlacklistedState());
         holder.name.setText(class_review.getName());
         holder.review.setText(class_review.getReview());
     }

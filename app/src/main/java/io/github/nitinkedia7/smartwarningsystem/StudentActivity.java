@@ -76,7 +76,9 @@ public class StudentActivity extends AppCompatActivity {
         mStudentDatabaseReference.child(uid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                fullName = dataSnapshot.child("fullName").getValue().toString();
+                if(dataSnapshot!=null){
+                    fullName = dataSnapshot.child("fullName").getValue().toString();
+                }
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -118,7 +120,7 @@ public class StudentActivity extends AppCompatActivity {
                                             session_password = dataSnapshot.child("sessionPassword").getValue().toString();
                                             if (session_password.equals(sessionPassword.getText().toString())) {
                                                 mSessionDatabaseReference.child(courseName.getText().toString()).removeEventListener(mValueEventListener2);
-                                                StudentState studentState = new StudentState(fullName, 10, "Not Blacklisted", "None", user.getUid());
+                                                StudentState studentState = new StudentState(fullName, 10, "Not Blacklisted", "None", user.getUid(), 10);
                                                 saveUsertoSession(uid, session_name, studentState);
                                                 Intent intent = new Intent(StudentActivity.this, NotificationActivity.class);
                                                 intent.putExtra("session_name", session_name);

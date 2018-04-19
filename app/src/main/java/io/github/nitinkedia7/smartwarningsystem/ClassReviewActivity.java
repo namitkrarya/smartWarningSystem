@@ -143,7 +143,7 @@ public class ClassReviewActivity extends AppCompatActivity {
             Map singleUser = (Map) entry.getValue();
             String uid = entry.getKey();
             if(singleUser.get("isBlacklisted").toString().equals("Blacklisted")) {
-                StudentState student = new StudentState(singleUser.get("name").toString(), Integer.valueOf(singleUser.get("state").toString()), singleUser.get("isBlacklisted").toString(), singleUser.get("review").toString(), uid);
+                StudentState student = new StudentState(singleUser.get("name").toString(), Integer.valueOf(singleUser.get("state").toString()), singleUser.get("isBlacklisted").toString(), singleUser.get("review").toString(), uid, Integer.valueOf(singleUser.get("blacklistedState").toString()));
                 studentList.add(student);
             }
         }

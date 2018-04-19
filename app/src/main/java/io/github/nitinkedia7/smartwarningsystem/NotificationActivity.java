@@ -74,6 +74,7 @@ public class NotificationActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 status = Boolean.valueOf(dataSnapshot.child("isActive").getValue().toString());
                 if(!status){
+                    mSessionReference.removeEventListener(this);
                     Toast.makeText(getApplicationContext(), "Session has been terminated", Toast.LENGTH_SHORT).show();
                     finish();
                 }
@@ -88,11 +89,6 @@ public class NotificationActivity extends AppCompatActivity {
         timer = new CountDownTimer(300000, 1000) {
             public void onTick(long millisUntilFinished) {
                 Long remainingSec = millisUntilFinished/1000;
-//                if(!status){
-//                    timer.cancel();
-//
-//
-//                }
                 if (remainingSec % 10 == 0 && status) {
                     Random rand = new Random();
                     Integer randState = rand.nextInt(10)+1;
@@ -186,6 +182,7 @@ public class NotificationActivity extends AppCompatActivity {
                 notification.setStatus("Disabled");
                 mSessionReference.child("alerts").child(user.getUid()).child("unresponsiveAlerts").push().setValue(notification);
                 mSessionReference.child("joinedUsers").child(user.getUid()).child("isBlacklisted").setValue("Blacklisted");
+                mSessionReference.child("joinedUsers").child(user.getUid()).child("blacklistedState").setValue(Integer.valueOf(notification.getState()));
             }
         };
         timer.start();

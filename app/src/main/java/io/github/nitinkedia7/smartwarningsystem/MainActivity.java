@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputFilter;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
             new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    mProfessorDatabaseReference.child(user.getUid()).child("currentCourse").removeEventListener(this);
+//                    mProfessorDatabaseReference.child(user.getUid()).child("currentCourse").removeEventListener(this);
                     course_name = dataSnapshot.getValue().toString();
                 }
                 @Override
@@ -113,7 +114,30 @@ public class MainActivity extends AppCompatActivity {
                                 public void onClick(DialogInterface dialog, int which) {
                                     session_password = sessionPassword.getText().toString();
                                     course_name = courseName.getText().toString();
-                                    saveSessionDetails(user.getUid(), course_name, session_password);
+                                    if(TextUtils.isEmpty(course_name)){
+                                        Toast.makeText(MainActivity.this, "Please enter a course name", Toast.LENGTH_LONG).show();
+                                    }
+                                    else if(TextUtils.isEmpty(session_password)){
+                                        Toast.makeText(MainActivity.this, "Please enter a session password", Toast.LENGTH_LONG).show();
+                                    }
+                                    else{
+                                        mSessionDatabaseReference.child(course_name).addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                mSessionDatabaseReference.child(course_name).removeEventListener(this);
+                                                if(dataSnapshot.exists()){
+                                                    Toast.makeText(MainActivity.this, "Session already running!", Toast.LENGTH_LONG).show();
+                                                }
+                                                else{
+                                                    saveSessionDetails(user.getUid(), course_name, session_password);
+                                                }
+                                            }
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+                                            }
+                                        });
+//                                        saveSessionDetails(user.getUid(), course_name, session_password);
+                                    }
                                     dialog.dismiss();
                                 }
                             });
