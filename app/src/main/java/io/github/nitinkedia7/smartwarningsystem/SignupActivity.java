@@ -97,7 +97,7 @@ public class SignupActivity extends AppCompatActivity {
                     // the auth state listener will be notified and logic to handle the
                     // signed in user can be handled in the listener.
                     if (!task.isSuccessful()) {
-                        Toast.makeText(SignupActivity.this, "Authentication failed." + task.getException(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignupActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
                     } else {
                         FirebaseUser user = auth.getCurrentUser();
                         String refreshedToken = FirebaseInstanceId.getInstance().getToken();

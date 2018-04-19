@@ -124,7 +124,7 @@ public class StudentActivity extends AppCompatActivity {
                                                 intent.putExtra("session_name", session_name);
                                                 intent.putExtra("fullName", fullName);
                                                 StudentActivity.this.startActivity(intent);
-                                                finish();
+
                                             } else {
                                                 Toast.makeText(StudentActivity.this, "Password doesn't match", Toast.LENGTH_SHORT).show();
                                             }

@@ -148,12 +148,14 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot.exists()) {
-                                mSessionDatabaseReference.child(course_name).removeEventListener(this);
-                                mSessionDatabaseReference.child(course_name).child("joinedUsers").addListenerForSingleValueEvent(
+//                                mSessionDatabaseReference.child(course_name).removeEventListener(this);
+                                mSessionDatabaseReference.child(course_name).addListenerForSingleValueEvent(
                                     new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
-                                            disengageStudents((Map<String, Object>) dataSnapshot.getValue());
+                                            if(Boolean.valueOf(dataSnapshot.child("isUserJoined").getValue().toString())) {
+                                                disengageStudents((Map<String, Object>) dataSnapshot.child("joinedUsers").getValue());
+                                            }
                                         }
 
                                         @Override
@@ -163,6 +165,7 @@ public class MainActivity extends AppCompatActivity {
                                     });
                                 mProfessorDatabaseReference.child(user.getUid()).child("isEngaged").setValue("false");
                                 mProfessorDatabaseReference.child(user.getUid()).child("currentCourse").setValue("None");
+                                mSessionDatabaseReference.child(course_name).removeEventListener(this);
                                 mSessionDatabaseReference.child(course_name).child("isActive").setValue(false);
                                 Toast.makeText(MainActivity.this, "Session ended successfully!", Toast.LENGTH_LONG).show();
                             } else {

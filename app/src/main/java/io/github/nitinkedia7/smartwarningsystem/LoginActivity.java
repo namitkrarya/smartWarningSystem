@@ -44,6 +44,11 @@ public class LoginActivity extends AppCompatActivity {
 
         //Get Firebase auth instance
         auth = FirebaseAuth.getInstance();
+        if(auth.getCurrentUser() != null){
+            Intent intent = new Intent(LoginActivity.this, StudentActivity.class);
+            startActivity(intent);
+            finish();
+        }
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
 

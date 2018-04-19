@@ -73,6 +73,10 @@ public class NotificationActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 status = Boolean.valueOf(dataSnapshot.child("isActive").getValue().toString());
+                if(!status){
+                    Toast.makeText(getApplicationContext(), "Session has been terminated", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
                 isBlacklisted = dataSnapshot.child("joinedUsers").child(user.getUid()).child("isBlacklisted").getValue().toString();
             }
             @Override
@@ -81,13 +85,18 @@ public class NotificationActivity extends AppCompatActivity {
             }
         });
 
-        new CountDownTimer(300000, 1000) {
+        timer = new CountDownTimer(300000, 1000) {
             public void onTick(long millisUntilFinished) {
                 Long remainingSec = millisUntilFinished/1000;
-
+//                if(!status){
+//                    timer.cancel();
+//
+//
+//                }
                 if (remainingSec % 10 == 0 && status) {
                     Random rand = new Random();
                     Integer randState = rand.nextInt(10)+1;
+
                     mSessionReference.child("joinedUsers").child(user.getUid()).child("state").setValue(randState.toString());
                     if(mChildEventListener == null) {
                         mChildEventListener = new ChildEventListener() {
@@ -124,7 +133,8 @@ public class NotificationActivity extends AppCompatActivity {
             public void onFinish() {
 
             }
-        }.start();
+        };
+        timer.start();
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
