@@ -24,105 +24,111 @@ import com.google.firebase.iid.FirebaseInstanceId;
 
 public class SignupActivity extends AppCompatActivity {
 
-    private EditText inputName, inputEmail, inputPassword;
-    private RadioGroup userTypeOptions;
-    private RadioButton inputUserType;
-    private Button btnSignIn, btnSignUp;
-    private ProgressBar progressBar;
-    private FirebaseAuth auth;
+    private FirebaseAuth mFirebaseAuth;
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mDatabaseReference;
-    private String userType;
-    private String fullName;
+    private EditText mNameField, mEmailField, mPasswordField;
+    private RadioGroup mUserTypeOptions;
+    private RadioButton mSelectedUserType;
+    private Button mSignInButton, mSignUpButton;
+    private ProgressBar mProgressBar;
+    private String userType, fullName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        //Get Firebase auth instance
-        auth = FirebaseAuth.getInstance();
+        // Get Firebase auth instance
+        mFirebaseAuth= FirebaseAuth.getInstance();
+        // Get Firebase database references
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
 
-        btnSignIn = (Button) findViewById(R.id.sign_in_button);
-        btnSignUp = (Button) findViewById(R.id.sign_up_button);
-        inputName = (EditText) findViewById(R.id.name);
-        inputEmail = (EditText) findViewById(R.id.email);
-        inputPassword = (EditText) findViewById(R.id.password);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        userTypeOptions = (RadioGroup) findViewById(R.id.userTypeRadioGroup);
+        // Assign all UI elements (text-box, buttons) to variables
+        mSignInButton= (Button) findViewById(R.id.sign_in_button);
+        mSignUpButton = (Button) findViewById(R.id.sign_up_button);
+        mNameField = (EditText) findViewById(R.id.name);
+        mEmailField = (EditText) findViewById(R.id.email);
+        mPasswordField = (EditText) findViewById(R.id.password);
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        mUserTypeOptions = (RadioGroup) findViewById(R.id.userTypeRadioGroup);
 
-        btnSignIn.setOnClickListener(new View.OnClickListener() {
+        // Since Sign Up activity activity can only be opened from Sign In activity,
+        // just finish this activity to go back to Sign In
+        mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
-
-        btnSignUp.setOnClickListener(new View.OnClickListener() {
+        // Register user
+        mSignUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            fullName = inputName.getText().toString().trim();
-            String email = inputEmail.getText().toString().trim();
-            String password = inputPassword.getText().toString().trim();
-            int selectedId = userTypeOptions.getCheckedRadioButtonId();
-            inputUserType = (RadioButton) findViewById(selectedId);
-            userType = inputUserType.getText().toString();
+                // Eliminates leading and trailing spaces from input strings
+                fullName = mNameField.getText().toString().trim();
+                String email = mEmailField.getText().toString().trim();
+                String password = mPasswordField.getText().toString().trim();
+                // Find user type from selected radio button
+                mSelectedUserType = (RadioButton) findViewById(mUserTypeOptions.getCheckedRadioButtonId());
+                userType = mSelectedUserType.getText().toString();
 
-            if (TextUtils.isEmpty(fullName)) {
-                Toast.makeText(getApplicationContext(), "Enter your name!", Toast.LENGTH_SHORT).show();
-                return;
-            }
+                // Validate- input email,password and name must be nonempty
+                if (TextUtils.isEmpty(email)) {
+                    mEmailField.setError("Required.");
+                    return;
+                } else {
+                    mEmailField.setError(null);
+                }
 
-            if (TextUtils.isEmpty(email)) {
-                Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_SHORT).show();
-                return;
-            }
+                if (TextUtils.isEmpty(password)) {
+                    mPasswordField.setError("Required.");
+                    return;
+                } else {
+                    mPasswordField.setError(null);
+                }
 
-            if (TextUtils.isEmpty(password)) {
-                Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            progressBar.setVisibility(View.VISIBLE);
-            //create user
-            auth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                    Toast.makeText(SignupActivity.this, "createUserWithEmail:onComplete:" + task.isSuccessful(), Toast.LENGTH_SHORT).show();
-                    progressBar.setVisibility(View.GONE);
-                    // If sign in fails, display a message to the user. If sign in succeeds
-                    // the auth state listener will be notified and logic to handle the
-                    // signed in user can be handled in the listener.
-                    if (!task.isSuccessful()) {
-                        Toast.makeText(SignupActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
-                    } else {
-                        FirebaseUser user = auth.getCurrentUser();
-                        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-                        AdditionalUserInfo userinfo = new AdditionalUserInfo(fullName, "false", refreshedToken, "None");
-                        if (userType.equals("Professor")) {
-                            mDatabaseReference.child("Professors").child(user.getUid()).setValue(userinfo);
-                            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
-                            startActivity(intent);
-                            finish();
-                        } else {
-                            mDatabaseReference.child("Students").child(user.getUid()).setValue(userinfo);
-                            Intent intent = new Intent(SignupActivity.this, StudentActivity.class);
-                            startActivity(intent);
-                            finish();
+                if (TextUtils.isEmpty(fullName)) {
+                    mPasswordField.setError("Required.");
+                    return;
+                } else {
+                    mPasswordField.setError(null);
+                }
+                // Show authentication progress to user.
+                mProgressBar.setVisibility(View.VISIBLE);
+                // create user
+                mFirebaseAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            // Show authentication progress to user.
+                            mProgressBar.setVisibility(View.GONE);
+                            if (!task.isSuccessful()) {
+                                // Sign Up unsuccessful, display message to user
+                                Toast.makeText(SignupActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
+                            } else {
+                                // Sign Up successful
+                                FirebaseUser user = mFirebaseAuth.getCurrentUser();
+                                String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+                                // Make an userData object with additional user information i.e. Full Name, user type and device token and save it to database
+                                AdditionalUserData userData = new AdditionalUserData(fullName, "false", refreshedToken, "None");
+                                // Based on usertype redirect to appropriate dashboard
+                                if (userType.equals("Professor")) {
+                                    mDatabaseReference.child("Professors").child(user.getUid()).setValue(userData);
+                                    Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                } else {
+                                    mDatabaseReference.child("Students").child(user.getUid()).setValue(userData);
+                                    Intent intent = new Intent(SignupActivity.this, StudentActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            }
                         }
-                    }
-                    }
-                });
-        }
-    });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        progressBar.setVisibility(View.GONE);
+                    });
+            }
+        });
     }
 }

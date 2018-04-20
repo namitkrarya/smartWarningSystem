@@ -1,17 +1,13 @@
 package io.github.nitinkedia7.smartwarningsystem;
 
-/**
- * Created by nk7 on 11/04/18.
- */
+public class Student {
 
-public class StudentState {
-
-    private String name;
-    private Integer state;
-    private String isBlacklisted;
-    private String review;
-    private String uid;
-    private Integer blacklistedState;
+    private String name;                //Student name
+    private Integer state;              //Current student state
+    private String isBlacklisted;       //Whether the student has responded to all the alerts or not
+    private String review;              //Review given by the professor
+    private String uid;                 //uid of the student
+    private Integer blacklistedState;   //Last state when the student was blacklisted
 
     public Integer getBlacklistedState() { return blacklistedState; }
 
@@ -33,10 +29,10 @@ public class StudentState {
         this.isBlacklisted = isBlacklisted;
     }
 
-    public StudentState() {
+    public Student() {
     }
 
-    public StudentState(String name, Integer state, String isBlacklisted, String review, String uid, Integer blacklistedState) {
+    public Student(String name, Integer state, String isBlacklisted, String review, String uid, Integer blacklistedState) {
         this.name = name;
         this.blacklistedState = blacklistedState;
         this.state = state;

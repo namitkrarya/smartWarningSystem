@@ -10,6 +10,7 @@ public class NotificationTouchListener implements RecyclerView.OnItemTouchListen
     private GestureDetector gestureDetector;
     private ClickListener clickListener;
 
+    //Triggers when the notification is tapped upon
     public NotificationTouchListener(Context context, final RecyclerView recyclerView, final ClickListener clickListener) {
         this.clickListener = clickListener;
         gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
@@ -30,7 +31,6 @@ public class NotificationTouchListener implements RecyclerView.OnItemTouchListen
 
     @Override
     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-
         View child = rv.findChildViewUnder(e.getX(), e.getY());
         if (child != null && clickListener != null && gestureDetector.onTouchEvent(e)) {
             clickListener.onClick(child, rv.getChildPosition(child));

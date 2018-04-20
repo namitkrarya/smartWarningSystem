@@ -1,14 +1,16 @@
 package io.github.nitinkedia7.smartwarningsystem;
 
-public class notification {
-    private String state, comment;
-    private String time;
-    private String status;
+public class Notification {
 
-    public notification() {
+    private String state;       //Current State of user
+    private String comment;     //Comment on the current state
+    private String time;        //Time left to react to the notification
+    private String status;      //Condition of the notification(Enabled/Disabled)
+
+    public Notification() {
     }
 
-    public notification(String state, String comment, String time, String status) {
+    public Notification(String state, String comment, String time, String status) {
         this.state = state;
         this.comment = comment;
         this.time = time;

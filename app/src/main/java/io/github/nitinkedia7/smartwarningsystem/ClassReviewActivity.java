@@ -1,119 +1,117 @@
 package io.github.nitinkedia7.smartwarningsystem;
-
-
+// import android, java, Google Firebase libraries
 import android.app.AlertDialog;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
-import android.content.Context;
-//import android.content.DialogInterface;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.Calendar;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
 public class ClassReviewActivity extends AppCompatActivity {
-    private List<StudentState> studentList = new ArrayList<>();
-    private RecyclerView recyclerView;
-    private ClassReviewAdapter mAdapter;
-
+    private static final String TAG = "ClassReview";
+    // an array of objects containing student details
+    private List<Student> mStudentList = new ArrayList<>();
+    // mAdapter is an object that configures the xml for displaying list
+    private RecyclerView mRecyclerView;
+    private RecyclerViewAdapter mAdapter;
+    // Database Variables
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mDatabaseReference;
-    private FirebaseAuth mFirebaseAuth;
-    private String status, courseName;
     private ValueEventListener mValueEventListener;
-
+    // name of current session
+    private String mSessionName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // TODO- change name of xml file
         setContentView(R.layout.activity_notification);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        courseName = getIntent().getStringExtra("course_name");
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        // Session name was passed from dashboard as it will be used in database access
+        mSessionName = getIntent().getStringExtra("sessionName");
 
-        mAdapter = new ClassReviewAdapter(studentList);
+        // Assigning the studentlist to adapter which inturn displays the xml to display list
+        mAdapter = new RecyclerViewAdapter(mStudentList);
+        mAdapter.displayReview = true;
+        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
-        recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(mAdapter);
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.setAdapter(mAdapter);
 
+        // connecting to firebase database
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseReference = mFirebaseDatabase.getReference();
+        mDatabaseReference = mFirebaseDatabase.getReference().child("Sessions").child(mSessionName).child("joinedUsers");
 
-
+        // Attach a listener to the location of joined students in database to obtain joined student list
+        // Path is "/Sessions/{msessionName}/joinedUsers/"
         mValueEventListener = new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        //Get map of users in datasnapshot
-                        prepareStatusData((Map<String, Object>) dataSnapshot.getValue());
-                        mDatabaseReference.child("Sessions").child(courseName).child("joinedUsers").removeEventListener(mValueEventListener);
-                    }
+            @Override
+            // onDataChange runs each time data is changed in above path and returns the whole data in snapshot
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Get map of users in datasnapshot
+                prepareStatusData((Map<String, Object>) dataSnapshot.getValue());
+//                        mDatabaseReference.child("Sessions").child(courseName).child("joinedUsers").removeEventListener(mValueEventListener);
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                //handle databaseError
+                Log.d(TAG, String.valueOf(databaseError.getCode()));
+            }
+        };
+        mDatabaseReference.addValueEventListener(mValueEventListener);
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        //handle databaseError
-                    }
-                };
-        mDatabaseReference.child("Sessions").child(courseName).child("joinedUsers").addValueEventListener(mValueEventListener);
-//        mDatabaseReference.child("session").removeEventListener(mValueEventListener);
-
-//        prepareStatusData();
-        recyclerView.addOnItemTouchListener(new NotificationTouchListener(getApplicationContext(), recyclerView, new NotificationTouchListener.ClickListener() {
+        // Each student (tile) displayed can be tapped, summoning an dialog where the student review can be entered
+        // This is expected to be done after discussing with the concerned student
+        mRecyclerView.addOnItemTouchListener(new NotificationTouchListener(getApplicationContext(), mRecyclerView, new NotificationTouchListener.ClickListener() {
             @Override
             public void onClick(View view, final int position) {
-                final StudentState student = studentList.get(position);
-//                Toast.makeText(getApplicationContext(), "Opening Review Dialog", Toast.LENGTH_SHORT).show();
+                // using the index which was tapped to get the concerned student object
+                final Student student = mStudentList.get(position);
+
                 AlertDialog.Builder builder = new AlertDialog.Builder(ClassReviewActivity.this, R.style.MyDialogTheme);
                 builder.setTitle(student.getName());
-                // I'm using fragment here so I'm using getView() to provide ViewGroup
-                // but you can provide here any other instance of ViewGroup from your Fragment / Activity
                 View viewInflated = getLayoutInflater().inflate(R.layout.dialog_review, (ViewGroup) null, false);
                 // Set up the input
-                final EditText review = (EditText) viewInflated.findViewById(R.id.input);
+                final EditText reviewField = (EditText) viewInflated.findViewById(R.id.inputReview);
                 // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
                 builder.setView(viewInflated);
-                // Set up the buttons
+                // Set up the OK and Cancel buttons
                 builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
-                        mDatabaseReference.child("Sessions").child(courseName).child("joinedUsers").child(student.getUid()).child("review").setValue(review.getText().toString());
-                        student.setReview(review.getText().toString());
+                        // Input review must not be empty
+                        String review = reviewField.getText().toString().trim();
+                        if (TextUtils.isEmpty(review)) {
+                            reviewField.setError("Required.");
+                            return;
+                        } else {
+                            reviewField.setError(null);
+                        }
+                        // Update review in database
+                        mDatabaseReference.child(student.getUid()).child("review").setValue(review);
+                        // This review must also reflect in the display when dialog closes
+                        student.setReview(review);
                         mAdapter.notifyItemChanged(position);
                         dialog.dismiss();
                     }
@@ -124,7 +122,6 @@ public class ClassReviewActivity extends AppCompatActivity {
                         dialog.cancel();
                     }
                 });
-
                 builder.show();
             }
 
@@ -134,27 +131,31 @@ public class ClassReviewActivity extends AppCompatActivity {
             }
         }));
     }
-
+    // this function passes each fetched student object into the adapter for display.
     private void prepareStatusData(Map<String,Object> students) {
-        //iterate through each user, ignoring their UID
+        //iterate through each user
         for (Map.Entry<String, Object> entry : students.entrySet()){
-
-            //Get user map
-            Map singleUser = (Map) entry.getValue();
+            //Get user map and Uid and typecast it to Student object
+            Map joinedStudent = (Map) entry.getValue();
             String uid = entry.getKey();
-            if(singleUser.get("isBlacklisted").toString().equals("Blacklisted")) {
-                StudentState student = new StudentState(singleUser.get("name").toString(), Integer.valueOf(singleUser.get("state").toString()), singleUser.get("isBlacklisted").toString(), singleUser.get("review").toString(), uid, Integer.valueOf(singleUser.get("blacklistedState").toString()));
-                studentList.add(student);
+            // Review is done only for blacklisted students
+            if(joinedStudent.get("isBlacklisted").toString().equals("Blacklisted")) {
+                Student student = new Student(joinedStudent.get("name").toString(),
+                        Integer.valueOf(joinedStudent.get("state").toString()),
+                        joinedStudent.get("isBlacklisted").toString(),
+                        joinedStudent.get("review").toString(), uid,
+                        Integer.valueOf(joinedStudent.get("blacklistedState").toString())
+                );
+                mStudentList.add(student);
             }
         }
-        mAdapter.notifyDataSetChanged();
+        mAdapter.notifyDataSetChanged(); // start loading into xml
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                // API 5+ solution
-                onBackPressed();
+                // Revert to dashboard when back button is pressed
                 Intent intent = new Intent(ClassReviewActivity.this, MainActivity.class);
                 ClassReviewActivity.this.startActivity(intent);
                 finish();
