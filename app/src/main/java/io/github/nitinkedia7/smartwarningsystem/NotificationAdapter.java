@@ -1,7 +1,28 @@
+
+/**
+ <header>
+ Module: NotificationAdapter
+ Date of creation: 15-04-18
+ Author: Namit Kumar
+ Modification history:
+ 15-04-18: Receiving the notificationlist and binding it to layout file
+ 16-04-18: Documented code.
+ Synopsis:
+ This module receives the notificationlist and binds to layout file to display the list.
+ Global variables: None
+ Functions:
+ NotificationAdapter()
+ onCreateViewHolder()
+ onBindViewHolder()
+ getItemCount()
+ </header>
+ **/
+
+
 package io.github.nitinkedia7.smartwarningsystem;
 
+// import android, java libraries
 import android.support.v7.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

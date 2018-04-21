@@ -1,6 +1,27 @@
-package io.github.nitinkedia7.smartwarningsystem;
-// import android, java, Google Firebase libraries
 
+/**
+ <header>
+ Module: StudentActivity
+ Date of creation: 14-04-18
+ Author: Namit Kumar
+ Modification history:
+ 14-04-18: Created module with initialization functions
+ 15-04-18: Implement different condition checks for all Join Session button
+ 16-04-18: Documented code.
+ Synopsis:
+ This module is a dashboard for the student targeted function JoinSession
+ Global variables: None
+ Functions:
+ onCreateOptionsMenu()
+ onOptionsItemSelected()
+ saveUsertoSession()
+ mJoinSessionButton.setOnClickListener()
+ </header>
+ **/
+
+package io.github.nitinkedia7.smartwarningsystem;
+
+// import android, java, Google Firebase libraries
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -120,10 +141,10 @@ public class StudentActivity extends AppCompatActivity {
                                                 //Enroll the student in the session
                                                 saveUsertoSession(mUid, sessionName, student);
                                                 //Fire up the Notification Activity
-                                                Intent intent = new Intent(StudentActivity.this, NotificationActivity.class);
+                                                Intent notificationActivityIntent = new Intent(StudentActivity.this, NotificationActivity.class);
                                                 //Pass the session name to the next activity
-                                                intent.putExtra("sessionName", mSessionName);
-                                                StudentActivity.this.startActivity(intent);
+                                                notificationActivityIntent.putExtra("sessionName", mSessionName);
+                                                StudentActivity.this.startActivity(notificationActivityIntent);
 
                                             } else {
                                                 Toast.makeText(StudentActivity.this, "Password doesn't match", Toast.LENGTH_SHORT).show();
@@ -138,7 +159,7 @@ public class StudentActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onCancelled(DatabaseError databaseError) {
-                                    //handle databse error
+                                    //handle database error
                                 }
                             });
                             dialog.dismiss();

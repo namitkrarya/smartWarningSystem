@@ -1,3 +1,27 @@
+
+/**
+ <header>
+ Class: Notification
+ Date of creation: 14-04-18
+ Author: Namit Kumar
+ Modification history:
+ 14-04-18: Created class with constructor, getter and setter functions for every variable
+ 16-04-18: Documented code.
+ Synopsis:
+ This is a class which contains the attributes of a notification for a student
+ Global variables: None
+ Functions:
+ getState()
+ setState()
+ getComment()
+ setComment()
+ getTime()
+ setTime()
+ getStatus()
+ setStatus()
+ </header>
+ **/
+
 package io.github.nitinkedia7.smartwarningsystem;
 
 public class Notification {

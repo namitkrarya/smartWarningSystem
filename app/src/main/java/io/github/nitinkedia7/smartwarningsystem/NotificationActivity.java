@@ -1,5 +1,27 @@
+
+/**
+ <header>
+ Module: NotificationActivity
+ Date of creation: 14-04-18
+ Author: Namit Kumar
+ Modification history:
+ 14-04-18: Created module with initialization functions
+ 15-04-18: Implement timers for state change and responses to notifications
+ 16-04-18: Documented code.
+ Synopsis:
+ This module manages all the in-app notification recieved by student
+ and response logic.
+ Global variables: None
+ Functions:
+ prepareNotificationData()
+ onOptionsItemSelected()
+ </header>
+ **/
+
+
 package io.github.nitinkedia7.smartwarningsystem;
 
+// import android, java, Google Firebase libraries
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -47,7 +69,7 @@ public class NotificationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         //set the view
-        setContentView(R.layout.activity_notification);
+        setContentView(R.layout.activity_recycler_view);
 
         //Get the back button on the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -130,18 +152,18 @@ public class NotificationActivity extends AppCompatActivity {
                             public void onCancelled(DatabaseError databaseError) { }
                         };
                         mSessionReference.child("alerts").child(user.getUid()).child("sentAlerts").addChildEventListener(mChildEventListener);
+                    }else {
+                        //handle database error
                     }
                 }
             }
-            public void onFinish() {
-
-            }
+            public void onFinish() { }
         };
         //Start the timer
         timer.start();
 
         //Recycler View to display all the notifications
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         mAdapter = new NotificationAdapter(notificationList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
@@ -165,9 +187,7 @@ public class NotificationActivity extends AppCompatActivity {
                 }
             }
             @Override
-            public void onLongClick(View view, int position) {
-
-            }
+            public void onLongClick(View view, int position) { }
         }));
     }
 
@@ -209,7 +229,7 @@ public class NotificationActivity extends AppCompatActivity {
                 //Push this notification into the unresponsive alert list of the student in the session
                 mSessionReference.child("alerts").child(user.getUid()).child("unresponsiveAlerts").push().setValue(notification);
                 mSessionReference.child("isUserBlacklisted").setValue(true);
-                //Mark the student as blaclkisted
+                //Mark the student as blacklisted
                 mSessionReference.child("joinedUsers").child(user.getUid()).child("isBlacklisted").setValue("Blacklisted");
                 //Update the state at which the student was last blacklisted
                 mSessionReference.child("joinedUsers").child(user.getUid()).child("blacklistedState").setValue(Integer.valueOf(notification.getState()));
@@ -225,8 +245,8 @@ public class NotificationActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             //Fire up the Student Activity
             case android.R.id.home:
-                Intent intent = new Intent(NotificationActivity.this, StudentActivity.class);
-                NotificationActivity.this.startActivity(intent);
+                Intent studentActivityIntent = new Intent(NotificationActivity.this, StudentActivity.class);
+                NotificationActivity.this.startActivity(studentActivityIntent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

@@ -1,4 +1,28 @@
+
+/**
+ <header>
+ Module: NotificationTouchListener
+ Date of creation: 15-04-18
+ Author: Namit Kumar
+ Modification history:
+ 15-04-18: Implement touch-listener on each notification
+ 16-04-18: Documented code.
+ Synopsis:
+ This module is a helper for NotificationActivity to detect response
+ on a notification.
+ Global variables: None
+ Functions:
+ NotificationTouchListener()
+ onInterceptTouchEvent()
+ onTouchEvent()
+ onRequestDisallowInterceptTouchEvent()
+ ClickListener()
+ </header>
+ **/
+
 package io.github.nitinkedia7.smartwarningsystem;
+
+// import android, java libraries
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.GestureDetector;
@@ -15,31 +39,31 @@ public class NotificationTouchListener implements RecyclerView.OnItemTouchListen
         this.clickListener = clickListener;
         gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
             @Override
-            public boolean onSingleTapUp(MotionEvent e) {
+            public boolean onSingleTapUp(MotionEvent motionEvent) {
                 return true;
             }
 
             @Override
-            public void onLongPress(MotionEvent e) {
-                View child = recyclerView.findChildViewUnder(e.getX(), e.getY());
+            public void onLongPress(MotionEvent motionEvent) {
+                View child = recyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
                 if (child != null && clickListener != null) {
-                    clickListener.onLongClick(child, recyclerView.getChildPosition(child));
+                    clickListener.onLongClick(child, recyclerView.getChildAdapterPosition(child));
                 }
             }
         });
     }
 
     @Override
-    public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-        View child = rv.findChildViewUnder(e.getX(), e.getY());
-        if (child != null && clickListener != null && gestureDetector.onTouchEvent(e)) {
-            clickListener.onClick(child, rv.getChildPosition(child));
+    public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+        View child = recyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
+        if (child != null && clickListener != null && gestureDetector.onTouchEvent(motionEvent)) {
+            clickListener.onClick(child, recyclerView.getChildAdapterPosition(child));
         }
         return false;
     }
 
     @Override
-    public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+    public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
     }
 
     @Override

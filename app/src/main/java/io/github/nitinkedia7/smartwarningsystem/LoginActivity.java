@@ -1,5 +1,26 @@
+
+/**
+ <header>
+ Module: LoginActivity
+ Date of creation: 12-04-18
+ Author: Jatin Goyal
+ Modification history:
+ 12-04-18: Created module with initialization functions
+ 13-04-18: Redirect to ProfessorActivity/StudentActivity based on user-type
+ 16-04-18: Documented code.
+ Synopsis:
+ This module takes user's credentials, validates them and redirects them to
+ ProfessorActivity/StudentActivity based on user-type.
+ Global variables: None
+ Functions:
+ Used in-built firebase signin functions
+
+ </header>
+ **/
+
 package io.github.nitinkedia7.smartwarningsystem;
 
+// import android, java, Google Firebase libraries
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -40,10 +61,10 @@ public class LoginActivity extends AppCompatActivity {
 
         //Get Firebase auth instance
         mFirebaseAuth = FirebaseAuth.getInstance();
-        // If user is already logged go to next activity
+        // If user is already logged in go to next activity
         if(mFirebaseAuth.getCurrentUser() != null){
-            Intent intent = new Intent(LoginActivity.this, StudentActivity.class);
-            startActivity(intent);
+            Intent intentStudentActivity = new Intent(LoginActivity.this, StudentActivity.class);
+            startActivity(intentStudentActivity);
             finish();
         }
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -52,11 +73,11 @@ public class LoginActivity extends AppCompatActivity {
         // set the view now
         setContentView(R.layout.activity_login);
         // Assign all UI elements (text-box, buttons) to variables
-        mEmailField = (EditText) findViewById(R.id.email);
-        mPasswordField = (EditText) findViewById(R.id.password);
+        mEmailField = (EditText) findViewById(R.id.emailField);
+        mPasswordField = (EditText) findViewById(R.id.passwordField);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        mSignupButton = (Button) findViewById(R.id.btn_signup);
-        mLoginButton = (Button) findViewById(R.id.btn_login);
+        mSignupButton = (Button) findViewById(R.id.signupButton);
+        mLoginButton = (Button) findViewById(R.id.loginButton);
 
         mSignupButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,79 +89,79 @@ public class LoginActivity extends AppCompatActivity {
         mLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Eliminates leading and trailing spaces from input strings
-                String email = mEmailField.getText().toString().trim();
-                String password = mPasswordField.getText().toString().trim();
-                // Validate- input email and password must be nonempty
-                if (TextUtils.isEmpty(email)) {
-                    mEmailField.setError("Required.");
-                    return;
-                } else {
-                    mEmailField.setError(null);
-                }
+            // Eliminates leading and trailing spaces from input strings
+            String email = mEmailField.getText().toString().trim();
+            String password = mPasswordField.getText().toString().trim();
+            // Validate- input email and password must be nonempty
+            if (TextUtils.isEmpty(email)) {
+                mEmailField.setError("Required.");
+                return;
+            } else {
+                mEmailField.setError(null);
+            }
 
-                if (TextUtils.isEmpty(password)) {
-                    mPasswordField.setError("Required.");
-                    return;
-                } else {
-                    mPasswordField.setError(null);
-                }
-                // Show authentication progress to user.
-                mProgressBar.setVisibility(View.VISIBLE);
-                //authenticate user
-                mFirebaseAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            // Authorisation process complete, awaiting result toast, hide progessbar
-                            mProgressBar.setVisibility(View.GONE);
+            if (TextUtils.isEmpty(password)) {
+                mPasswordField.setError("Required.");
+                return;
+            } else {
+                mPasswordField.setError(null);
+            }
+            // Show authentication progress to user.
+            mProgressBar.setVisibility(View.VISIBLE);
+            //authenticate user
+            mFirebaseAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                    // Authorisation process complete, awaiting result toast, hide progess bar
+                    mProgressBar.setVisibility(View.GONE);
 
-                            if (!task.isSuccessful()) {
-                                // Sign in unsuccessful, display message to user
-                                Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_SHORT).show();
-                            } else {
-                                // fetch user object from firebase and device token (for notifications)
-                                final FirebaseUser user = mFirebaseAuth.getCurrentUser();
-                                final String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+                    if (!task.isSuccessful()) {
+                        // Sign in unsuccessful, display message to user
+                        Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // fetch user object from firebase and device token (for notifications)
+                        final FirebaseUser user = mFirebaseAuth.getCurrentUser();
+                        final String refreshedToken = FirebaseInstanceId.getInstance().getToken();
 
-                                // Determine user type and redirect to appropriate dashboard, also update token in database
-                                mDatabaseReference.child("Professors").child(user.getUid()).addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        if(dataSnapshot.exists()) {
-                                            // user is a student
-                                            mDatabaseReference.child("Professors").child(user.getUid()).removeEventListener(this);
-                                            mDatabaseReference.child("Professors").child(user.getUid()).child("token").setValue(refreshedToken);
-                                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                            startActivity(intent);
-                                            finish();
-                                        }
-                                    }
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-                                        Log.d(TAG, String.valueOf(databaseError.getCode()));
-                                    }
-                                });
-                                mDatabaseReference.child("Students").child(user.getUid()).addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        if(dataSnapshot.exists()) {
-                                            // user is a student
-                                            mDatabaseReference.child("Students").child(user.getUid()).removeEventListener(this);
-                                            mDatabaseReference.child("Students").child(user.getUid()).child("token").setValue(refreshedToken);
-                                            Intent intent = new Intent(LoginActivity.this, StudentActivity.class);
-                                            startActivity(intent);
-                                            finish();
-                                        }
-                                    }
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-                                        Log.d(TAG, String.valueOf(databaseError.getCode()));
-                                    }
-                                });
+                        // Determine user type and redirect to appropriate dashboard, also update token in database
+                        mDatabaseReference.child("Professors").child(user.getUid()).addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if(dataSnapshot.exists()) {
+                                    // user is a student
+                                    mDatabaseReference.child("Professors").child(user.getUid()).removeEventListener(this);
+                                    mDatabaseReference.child("Professors").child(user.getUid()).child("token").setValue(refreshedToken);
+                                    Intent professorActivityIntent = new Intent(LoginActivity.this, ProfessorActivity.class);
+                                    startActivity(professorActivityIntent);
+                                    finish();
+                                }
                             }
-                        }
-                    });
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                Log.d(TAG, String.valueOf(databaseError.getCode()));
+                            }
+                        });
+                        mDatabaseReference.child("Students").child(user.getUid()).addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if(dataSnapshot.exists()) {
+                                    // user is a student
+                                    mDatabaseReference.child("Students").child(user.getUid()).removeEventListener(this);
+                                    mDatabaseReference.child("Students").child(user.getUid()).child("token").setValue(refreshedToken);
+                                    Intent studentActivityIntent = new Intent(LoginActivity.this, StudentActivity.class);
+                                    startActivity(studentActivityIntent);
+                                    finish();
+                                }
+                            }
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                Log.d(TAG, String.valueOf(databaseError.getCode()));
+                            }
+                        });
+                    }
+                    }
+                });
             }
         });
     }

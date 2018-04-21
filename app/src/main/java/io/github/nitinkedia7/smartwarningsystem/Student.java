@@ -1,3 +1,32 @@
+
+/**
+ <header>
+ Class: Student
+ Date of creation: 14-04-18
+ Author: Namit Kumar
+ Modification history:
+ 14-04-18: Created class with constructor, getter and setter functions for every variable
+ 16-04-18: Documented code.
+ Synopsis:
+ This is a class which contains the attributes of a student for a particular session
+ Global variables: None
+ Functions:
+ getBlacklistedState()
+ setBlacklistedState()
+ getReview()
+ setReview()
+ getIsBlacklisted()
+ setIsBlacklisted()
+ getUid()
+ setUid()
+ getName()
+ setName()
+ getState()
+ setState()
+ </header>
+ **/
+
+
 package io.github.nitinkedia7.smartwarningsystem;
 
 public class Student {

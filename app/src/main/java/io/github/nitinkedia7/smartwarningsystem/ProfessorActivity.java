@@ -1,5 +1,30 @@
+
+/**
+ <header>
+ Module: ProfessorActivity
+ Date of creation: 14-04-18
+ Author: Nitin Kedia
+ Modification history:
+ 14-04-18: Created module with initialization functions
+ 15-04-18: Implement different condition checks for all 4 buttons
+ 16-04-18: Documented code.
+ Synopsis:
+ This module is a dashboard for the professor targeted functions like
+ CreateSession, EndSession etc.
+ Global variables: None
+ Functions:
+ onCreateOptionsMenu()
+ onOptionsItemSelected()
+ disengageStudents()
+ saveSessionDetails()
+ --button.setOnClickListener() have been modified and used
+ --for all buttons
+ </header>
+ **/
+
 package io.github.nitinkedia7.smartwarningsystem;
 
+// import android, java, Google Firebase libraries
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,16 +45,15 @@ import java.util.Map;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class MainActivity extends AppCompatActivity {
+public class ProfessorActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "ProfessorActivity";
     private Button mCreateSessionButton;
     private Button mEndSessionButton;
     private Button mClassStatusButton;
@@ -88,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if(!mIsEngaged) {
                     // Display a dialog asking details for new session.
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this, R.style.MyDialogTheme);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ProfessorActivity.this, R.style.MyDialogTheme);
                     builder.setTitle("Enter Session Details");
                     View viewInflated = getLayoutInflater().inflate(R.layout.create_session_dialog, (ViewGroup) null, false);
                     final EditText sessionNameField = (EditText) viewInflated.findViewById(R.id.sessionName);
@@ -108,13 +132,13 @@ public class MainActivity extends AppCompatActivity {
                                 sessionPasswordField.setError("Required.");
                                 return;
                             } else sessionNameField.setError(null);
-                            // ckeck for condition 2, session name must not already exist.
+                            // check for condition 2, session name must not already exist.
                             mSessionDatabaseReference.child(sessionName).addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     mSessionDatabaseReference.child(sessionName).removeEventListener(this);
                                     if(dataSnapshot.exists()){
-                                        Toast.makeText(MainActivity.this, "Session already running!", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(ProfessorActivity.this, "Session already running!", Toast.LENGTH_SHORT).show();
                                     }
                                     else {
                                         saveSessionDetails(user.getUid(), sessionName, sessionPassword);
@@ -136,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                     });
                     builder.show();
                 } else {
-                    Toast.makeText(MainActivity.this, "Current Session is Active", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProfessorActivity.this, "Current Session is Active", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -159,10 +183,9 @@ public class MainActivity extends AppCompatActivity {
                                 mProfessorDatabaseReference.child(user.getUid()).child("isEngaged").setValue("false");
                                 mProfessorDatabaseReference.child(user.getUid()).child("currentSession").setValue("None");
                                 mSessionDatabaseReference.child(mSessionName).removeEventListener(this);
-
-                                Toast.makeText(MainActivity.this, "Session ended successfully.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(ProfessorActivity.this, "Session ended successfully.", Toast.LENGTH_LONG).show();
                             } else {
-                                Toast.makeText(MainActivity.this, "Session already ended.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ProfessorActivity.this, "Session already ended.", Toast.LENGTH_SHORT).show();
                             }
                         }
                         @Override
@@ -171,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG, String.valueOf(databaseError.getCode()));
                         }
                     });
-                } else Toast.makeText(MainActivity.this, "No active session running", Toast.LENGTH_SHORT).show();
+                } else Toast.makeText(ProfessorActivity.this, "No active session running", Toast.LENGTH_SHORT).show();
             }
         });
         // See Class Status i.e. the current states of joined students, only if the following conditions hold
@@ -181,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(!mIsEngaged){
-                    Toast.makeText(MainActivity.this, "No active session running", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ProfessorActivity.this, "No active session running", Toast.LENGTH_LONG).show();
                 } else {
                     mSessionDatabaseReference.child(mSessionName).child("isUserJoined").addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -191,12 +214,11 @@ public class MainActivity extends AppCompatActivity {
                                 mSessionDatabaseReference.child(mSessionName).child("isUserJoined").removeEventListener(this);
                                 // Launch new window to show list of students with details
                                 // also pass session name to new activity
-                                Intent intent = new Intent(MainActivity.this, ClassStatusActivity.class);
-                                intent.putExtra("sessionName", mSessionName);
-                                MainActivity.this.startActivity(intent);
-                                finish();
+                                Intent classStatusActivityIntent = new Intent(ProfessorActivity.this, ClassStatusActivity.class);
+                                classStatusActivityIntent.putExtra("sessionName", mSessionName);
+                                ProfessorActivity.this.startActivity(classStatusActivityIntent);
                             } else {
-                                Toast.makeText(MainActivity.this, "No Students Joined!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(ProfessorActivity.this, "No Students Joined!", Toast.LENGTH_LONG).show();
                             }
                         }
 
@@ -216,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(!mIsEngaged){
-                    Toast.makeText(MainActivity.this, "No active session running", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ProfessorActivity.this, "No active session running", Toast.LENGTH_LONG).show();
                 } else {
                     mSessionDatabaseReference.child(mSessionName).child("isUserBlacklisted").addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -226,12 +248,11 @@ public class MainActivity extends AppCompatActivity {
                                 mSessionDatabaseReference.child(mSessionName).child("isUserJoined").removeEventListener(this);
                                 // Launch a new activity (window) showing details of blacklisted students
                                 // also pass session name
-                                Intent intent = new Intent(MainActivity.this, ClassReviewActivity.class);
-                                intent.putExtra("sessionName", mSessionName);
-                                MainActivity.this.startActivity(intent);
-                                finish();
+                                Intent classReviewActivityIntent = new Intent(ProfessorActivity.this, ClassReviewActivity.class);
+                                classReviewActivityIntent.putExtra("sessionName", mSessionName);
+                                ProfessorActivity.this.startActivity(classReviewActivityIntent);
                             } else {
-                                Toast.makeText(MainActivity.this, "No Students Blacklisted!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(ProfessorActivity.this, "No Students Blacklisted!", Toast.LENGTH_LONG).show();
                             }
                         }
 
@@ -259,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.sign_out_menu:
                 mFirebaseAuth.signOut();
                 // revert to Login screen
-                MainActivity.this.startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                ProfessorActivity.this.startActivity(new Intent(ProfessorActivity.this, LoginActivity.class));
                 finish();
                 return true;
             default:
@@ -290,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
         currentSessionReference.child("sessionPassword").setValue(sessionPassword);
         currentSessionReference.child("alerts").setValue("None");
         currentSessionReference.child("joinedUsers").setValue("None");
-        Toast.makeText(MainActivity.this, "Successfully created session!", Toast.LENGTH_LONG).show();
+        Toast.makeText(ProfessorActivity.this, "Successfully created session!", Toast.LENGTH_LONG).show();
     }
 
 }

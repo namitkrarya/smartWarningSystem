@@ -28,7 +28,7 @@
             android:layout_height="wrap_content">
 
             <EditText
-                android:id="@+id/name"
+                android:id="@+id/nameField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Full Name"
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content">
 
             <EditText
-                android:id="@+id/email"
+                android:id="@+id/emailField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/email"
@@ -60,7 +60,7 @@
             android:layout_height="wrap_content">
 
             <EditText
-                android:id="@+id/password"
+                android:id="@+id/passwordField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:focusableInTouchMode="true"
@@ -92,7 +92,7 @@
         </RadioGroup>
 
         <Button
-            android:id="@+id/sign_up_button"
+            android:id="@+id/signupButton"
             style="?android:textAppearanceSmall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -105,7 +105,7 @@
         <!-- Link to Login Screen -->
 
         <Button
-            android:id="@+id/sign_in_button"
+            android:id="@+id/signinButton"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dip"

@@ -1,7 +1,26 @@
+
+/**
+ <header>
+ Module: NotificationActivity
+ Date of creation: 14-04-18
+ Author: Nitin Kedia
+ Modification history:
+ 14-04-18: Created module with initialization functions
+ 15-04-18: Implemented functionality to fetch currently joined student details
+ 16-04-18: Documented code.
+ Synopsis:
+ This module enables the professor to see the currently joined student(s) with
+ current state.
+ Global variables: None
+ Functions:
+ prepareStatusData()
+ onOptionsItemSelected()
+ </header>
+ **/
+
 package io.github.nitinkedia7.smartwarningsystem;
 
 // import android, java, Google Firebase libraries
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -38,14 +57,13 @@ public class ClassStatusActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // TODO- change name of xml file
-        setContentView(R.layout.activity_notification);
+        setContentView(R.layout.activity_recycler_view);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         // Session name was passed from dashboard as it will be used in database access
         mSessionName = getIntent().getStringExtra("sessionName");
 
-        // Assigning the studentlist to adapter which inturn displays the xml to display list
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        // Assigning the studentlist to adapter which in-turn displays the xml to display list
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         mAdapter = new RecyclerViewAdapter(mStudentList);
         mAdapter.displayReview = false;
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -59,7 +77,7 @@ public class ClassStatusActivity extends AppCompatActivity {
         mDatabaseReference = mFirebaseDatabase.getReference();
 
         // Attach a listener to the location of joined students in database to obtain joined student list
-        // Path is "/Sessions/{msessionName}/joinedUsers/"
+        // Path is "/Sessions/{mSessionName}/joinedUsers/"
         mValueEventListener = new ValueEventListener() {
             @Override
             // onDataChange runs each time data is changed in above path and returns the whole data in snapshot
@@ -92,7 +110,7 @@ public class ClassStatusActivity extends AppCompatActivity {
             );
             mStudentList.add(student);
         }
-        mAdapter.notifyDataSetChanged(); // start loading into xml
+        mAdapter.notifyDataSetChanged(); // start loading into layout
     }
 
     @Override
@@ -100,8 +118,6 @@ public class ClassStatusActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 // Revert to dashboard when back button is pressed
-                Intent intent = new Intent(ClassStatusActivity.this, MainActivity.class);
-                ClassStatusActivity.this.startActivity(intent);
                 finish();
                 return true;
 

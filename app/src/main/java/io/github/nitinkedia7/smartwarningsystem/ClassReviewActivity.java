@@ -1,8 +1,30 @@
+
+/**
+ <header>
+ Module: NotificationActivity
+ Date of creation: 14-04-18
+ Author: Nitin Kedia
+ Modification history:
+ 14-04-18: Created module with initialization functions
+ 15-04-18: Implemented functionality to fetch blacklisted students and save their review
+ 16-04-18: Documented code.
+ Synopsis:
+ This module enables the professor to see the blacklisted student(s) in current
+ session and write a review for each of them.
+ Global variables: None
+ Functions:
+ onClickListener() for each blacklisted student
+ prepareReviewData()
+ onOptionsItemSelected()
+ </header>
+ **/
+
+
 package io.github.nitinkedia7.smartwarningsystem;
+
 // import android, java, Google Firebase libraries
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -30,7 +52,7 @@ public class ClassReviewActivity extends AppCompatActivity {
     private static final String TAG = "ClassReview";
     // an array of objects containing student details
     private List<Student> mStudentList = new ArrayList<>();
-    // mAdapter is an object that configures the xml for displaying list
+    // mAdapter is an object that configures the layout for displaying list
     private RecyclerView mRecyclerView;
     private RecyclerViewAdapter mAdapter;
     // Database Variables
@@ -43,16 +65,15 @@ public class ClassReviewActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // TODO- change name of xml file
-        setContentView(R.layout.activity_notification);
+        setContentView(R.layout.activity_recycler_view);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         // Session name was passed from dashboard as it will be used in database access
         mSessionName = getIntent().getStringExtra("sessionName");
 
-        // Assigning the studentlist to adapter which inturn displays the xml to display list
+        // Assigning the studentlist to adapter which in-turn displays the layout to display list
         mAdapter = new RecyclerViewAdapter(mStudentList);
         mAdapter.displayReview = true;
-        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -70,8 +91,8 @@ public class ClassReviewActivity extends AppCompatActivity {
             // onDataChange runs each time data is changed in above path and returns the whole data in snapshot
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Get map of users in datasnapshot
-                prepareStatusData((Map<String, Object>) dataSnapshot.getValue());
-//                        mDatabaseReference.child("Sessions").child(courseName).child("joinedUsers").removeEventListener(mValueEventListener);
+                prepareReviewData((Map<String, Object>) dataSnapshot.getValue());
+                mDatabaseReference.removeEventListener(mValueEventListener);
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -132,7 +153,7 @@ public class ClassReviewActivity extends AppCompatActivity {
         }));
     }
     // this function passes each fetched student object into the adapter for display.
-    private void prepareStatusData(Map<String,Object> students) {
+    private void prepareReviewData(Map<String,Object> students) {
         //iterate through each user
         for (Map.Entry<String, Object> entry : students.entrySet()){
             //Get user map and Uid and typecast it to Student object
@@ -149,15 +170,13 @@ public class ClassReviewActivity extends AppCompatActivity {
                 mStudentList.add(student);
             }
         }
-        mAdapter.notifyDataSetChanged(); // start loading into xml
+        mAdapter.notifyDataSetChanged(); // start loading into layout
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 // Revert to dashboard when back button is pressed
-                Intent intent = new Intent(ClassReviewActivity.this, MainActivity.class);
-                ClassReviewActivity.this.startActivity(intent);
                 finish();
                 return true;
 

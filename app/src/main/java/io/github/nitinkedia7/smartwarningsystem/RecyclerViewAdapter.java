@@ -1,3 +1,23 @@
+
+/**
+ <header>
+ Module: RecyclerViewAdapter
+ Date of creation: 15-04-18
+ Author: Nitin Kedia
+ Modification history:
+ 15-04-18: Receiving the studentlist and binding it to layout file
+ 16-04-18: Documented code.
+ Synopsis:
+ This module receives the studentlist and binds to layout file to display the list.
+ Global variables: public Boolean displayReview
+ Functions:
+ RecyclerViewAdapter()
+ onCreateViewHolder()
+ onBindViewHolder()
+ getItemCount()
+ </header>
+ **/
+
 package io.github.nitinkedia7.smartwarningsystem;
 
 // import android and java libraries
